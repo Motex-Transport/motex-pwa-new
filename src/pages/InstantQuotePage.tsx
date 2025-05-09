@@ -53,7 +53,7 @@ const RED_COLOR = '#DE1F27';
 
 // Define fonts
 const HEADING_FONT = '"Oswald", sans-serif';
-const BODY_FONT = '"Poppins", sans-serif';
+const BODY_FONT = '"Mulish", sans-serif';
 
 // Styled components
 const PageWrapper = styled(Box)(({ theme }) => ({
@@ -86,7 +86,7 @@ const StyledInput = styled('input')(({ theme }) => ({
   borderRadius: '4px',
   color: WHITE_TEXT,
   fontSize: '14px',
-  fontFamily: '"Poppins", sans-serif',
+  fontFamily: '"Mulish", sans-serif',
   outline: 'none',
   transition: 'all 0.2s ease',
   '&:focus': {
@@ -109,7 +109,7 @@ const StyledTextarea = styled('textarea')(({ theme }) => ({
   borderRadius: '4px',
   color: WHITE_TEXT,
   fontSize: '14px',
-  fontFamily: '"Poppins", sans-serif',
+  fontFamily: '"Mulish", sans-serif',
   outline: 'none',
   minHeight: '100px',
   resize: 'vertical',
@@ -131,7 +131,7 @@ const FormLabel = styled(Typography)(({ theme }) => ({
   color: 'rgba(255, 255, 255, 0.8)',
   fontSize: '14px',
   marginBottom: theme.spacing(1),
-  fontFamily: '"Poppins", sans-serif',
+  fontFamily: '"Mulish", sans-serif',
   fontWeight: 500,
   [theme.breakpoints.down('sm')]: {
     fontSize: '13px',
@@ -147,7 +147,7 @@ const SubmitButton = styled(Button)(({ theme }) => ({
   textTransform: 'none',
   fontSize: '15px',
   fontWeight: 500,
-  fontFamily: '"Poppins", sans-serif',
+  fontFamily: '"Mulish", sans-serif',
   width: '100%',
   boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)',
   transition: 'all 0.3s ease',
@@ -630,7 +630,7 @@ const InstantQuotePage = () => {
                 opacity: 0.7,
                 maxWidth: 600,
                 mx: 'auto',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"Mulish", sans-serif',
                 fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem' },
               }}>
                 Fill out the form below to receive a custom quote for your transport needs. We'll get back to you within 24 hours.
@@ -1167,114 +1167,6 @@ const InstantQuotePage = () => {
           </Box>
         </ContentSection>
           
-        {/* Footer - Updated for mobile responsiveness */}
-        <Box sx={{ bgcolor: '#000000', py: { xs: 4, md: 6 } }}>
-          <Container maxWidth="lg">
-            <Grid container spacing={{ xs: 3, md: 4 }}>
-              <Grid item xs={12} md={5}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 2, md: 3 } }}>
-                  <Box 
-                    component="img" 
-                    src="/MOTEX+Logo.png" 
-                    alt="MOTEX Logo" 
-                    sx={{ 
-                      height: { xs: 32, md: 40 }, 
-                    }} 
-                  />
-                </Box>
-                <Typography variant="body2" sx={{ 
-                  color: 'white', 
-                  opacity: 0.8, 
-                  mb: { xs: 2, md: 3 }, 
-                  fontFamily: '"Poppins", sans-serif', 
-                  fontWeight: 300,
-                  fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.875rem' }
-                }}>
-                  MOTEX Transport is a leading provider of logistics and transportation services across Australia, offering reliable and efficient solutions for businesses of all sizes.
-                </Typography>
-                
-                {/* Social Media Icons */}
-                <Stack direction="row" spacing={2} sx={{ mt: { xs: 1, md: 2 } }}>
-                  <IconButton 
-                    sx={{ 
-                      color: 'white', 
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      '&:hover': { backgroundColor: RED_COLOR },
-                      padding: { xs: '6px', md: '8px' },
-                    }}
-                    component="a"
-                    href="https://www.instagram.com/motextransport/"
-                  >
-                    <InstagramIcon sx={{ fontSize: { xs: '1.2rem', md: '1.5rem' } }} />
-                  </IconButton>
-                </Stack>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={3}>
-                <Typography variant="h6" sx={{ color: 'white', mb: 2, fontFamily: '"Oswald", sans-serif', fontWeight: 'bold', fontSize: '20px' }}>
-                  Quick Links
-                </Typography>
-                <Stack spacing={1}>
-                  <Link href="/" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Home
-                  </Link>
-                  <Link href="/about-us" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    About Us
-                  </Link>
-                  <Link href="#" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Services
-                  </Link>
-                  <Link href="/instant-quote" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Instant Quote
-                  </Link>
-                  <Link href="/gallery" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Gallery
-                  </Link>
-                  <Link href="#" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Contact
-                  </Link>
-                </Stack>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4}>
-                <Typography variant="h6" sx={{ color: 'white', mb: 2, fontFamily: '"Oswald", sans-serif', fontWeight: 'bold', fontSize: '20px' }}>
-                  Contact Information
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <LocationIcon sx={{ color: RED_COLOR, mr: 1.5 }} />
-                  <Typography variant="body2" sx={{ color: 'white', opacity: 0.8, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                  Rozelle NSW 2039, Australia
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <PhoneIcon sx={{ color: RED_COLOR, mr: 1.5 }} />
-                  <Typography variant="body2" sx={{ color: 'white', opacity: 0.8, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    +61 423 440 056
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <EmailIcon sx={{ color: RED_COLOR, mr: 1.5 }} />
-                  <Typography variant="body2" sx={{ color: 'white', opacity: 0.8, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    motextransportau@gmail.com
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
-            
-            <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', my: { xs: 3, md: 4 } }} />
-            
-            <Typography variant="body2" align="center" sx={{ 
-              color: 'white', 
-              opacity: 0.7, 
-              fontFamily: '"Poppins", sans-serif', 
-              fontWeight: 300,
-              fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' }
-            }}>
-              © {new Date().getFullYear()} MOTEX Transport. All rights reserved.
-            </Typography>
-          </Container>
-        </Box>
-        
         {/* Success Dialog - Updated for mobile */}
         <Dialog 
           open={successDialogOpen} 

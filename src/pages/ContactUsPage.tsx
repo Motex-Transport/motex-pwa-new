@@ -45,12 +45,13 @@ const DARK_BG = '#0A0A0A';
 const DARKER_BG = '#050505';
 const WHITE_TEXT = '#FFFFFF';
 const RED_COLOR = '#DE1F27';
+const PINK_RED = '#FF2992';
 const INPUT_BG = 'rgba(255, 255, 255, 0.05)';
 const ACCENT_COLOR = '#38BDF8';
 
 // Define fonts
 const HEADING_FONT = '"Oswald", sans-serif';
-const BODY_FONT = '"Poppins", sans-serif';
+const BODY_FONT = '"Mulish", sans-serif';
 
 // Styled components
 const PageWrapper = styled(Box)(({ theme }) => ({
@@ -906,177 +907,6 @@ const ContactUsPage = () => {
           </Box>
         </Container>
       </ContentSection>
-      
-      {/* Footer - Updated for mobile responsiveness */}
-      <Box sx={{ bgcolor: '#000000', py: { xs: 4, md: 6 } }}>
-        <Container maxWidth="lg">
-          <Grid container spacing={{ xs: 3, md: 4 }}>
-            <Grid item xs={12} md={5}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 2, md: 3 } }}>
-                <Box 
-                  component="img" 
-                  src="/MOTEX+Logo.png" 
-                  alt="MOTEX Logo" 
-                  sx={{ 
-                    height: { xs: 32, md: 40 }, 
-                  }} 
-                />
-              </Box>
-              <Typography variant="body2" sx={{ 
-                color: 'white', 
-                opacity: 0.8, 
-                mb: { xs: 2, md: 3 }, 
-                fontFamily: BODY_FONT, 
-                fontWeight: 300,
-                fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.875rem' }
-              }}>
-                MOTEX Transport is a leading provider of logistics and transportation services across Australia, offering reliable and efficient solutions for businesses of all sizes.
-              </Typography>
-              
-              {/* Social Media Icons */}
-              <Stack direction="row" spacing={2} sx={{ mt: { xs: 1, md: 2 } }}>
-                <IconButton 
-                  sx={{ 
-                    color: 'white', 
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    '&:hover': { backgroundColor: RED_COLOR },
-                    padding: { xs: '6px', md: '8px' },
-                  }}
-                  component="a"
-                  href="https://www.instagram.com/motextransport/"
-                >
-                  <InstagramIcon sx={{ fontSize: { xs: '1.2rem', md: '1.5rem' } }} />
-                </IconButton>
-              </Stack>
-            </Grid>
-            
-            <Grid item xs={6} md={3}>
-              <Typography variant="h6" sx={{ 
-                color: 'white', 
-                mb: { xs: 1, md: 2 }, 
-                fontFamily: HEADING_FONT, 
-                fontWeight: 'bold', 
-                fontSize: { xs: '16px', sm: '18px', md: '20px' } 
-              }}>
-                QUICK LINKS
-              </Typography>
-              <Stack spacing={0.5}>
-                <Link href="/" color="inherit" underline="hover" sx={{ 
-                  color: 'rgba(255, 255, 255, 0.8)', 
-                  fontFamily: BODY_FONT, 
-                  fontWeight: 300,
-                  fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' } 
-                }}>
-                  Home
-                </Link>
-                <Link href="/about-us" color="inherit" underline="hover" sx={{ 
-                  color: 'rgba(255, 255, 255, 0.8)', 
-                  fontFamily: BODY_FONT, 
-                  fontWeight: 300,
-                  fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' } 
-                }}>
-                  About Us
-                </Link>
-                <Link href="/services" color="inherit" underline="hover" sx={{ 
-                  color: 'rgba(255, 255, 255, 0.8)', 
-                  fontFamily: BODY_FONT, 
-                  fontWeight: 300,
-                  fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' } 
-                }}>
-                  Services
-                </Link>
-                <Link href="/instant-quote" color="inherit" underline="hover" sx={{ 
-                  color: 'rgba(255, 255, 255, 0.8)', 
-                  fontFamily: BODY_FONT, 
-                  fontWeight: 300,
-                  fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' } 
-                }}>
-                  Instant Quote
-                </Link>
-                <Link href="/gallery" color="inherit" underline="hover" sx={{ 
-                  color: 'rgba(255, 255, 255, 0.8)', 
-                  fontFamily: BODY_FONT, 
-                  fontWeight: 300,
-                  fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' } 
-                }}>
-                  Gallery
-                </Link>
-                <Link href="/contact-us" color="inherit" underline="hover" sx={{ 
-                  color: 'rgba(255, 255, 255, 0.8)', 
-                  fontFamily: BODY_FONT, 
-                  fontWeight: 300,
-                  fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' } 
-                }}>
-                  Contact
-                </Link>
-              </Stack>
-            </Grid>
-            
-            <Grid item xs={6} md={4}>
-              <Typography variant="h6" sx={{ 
-                color: 'white', 
-                mb: { xs: 1, md: 2 }, 
-                fontFamily: HEADING_FONT, 
-                fontWeight: 'bold', 
-                fontSize: { xs: '16px', sm: '18px', md: '20px' } 
-              }}>
-                CONTACT INFORMATION
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1.5 }}>
-                <LocationIcon sx={{ color: RED_COLOR, mr: 1.5, fontSize: { xs: '0.9rem', md: '1.2rem' } }} />
-                <Typography variant="body2" sx={{ 
-                  color: 'white', 
-                  opacity: 0.8, 
-                  fontFamily: BODY_FONT, 
-                  fontWeight: 300,
-                  fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' } 
-                }}>
-                  Rozelle N2039, Australia
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                <PhoneIcon sx={{ color: RED_COLOR, mr: 1.5, fontSize: { xs: '0.9rem', md: '1.2rem' } }} />
-                <Typography variant="body2" sx={{ 
-                  color: 'white', 
-                  opacity: 0.8, 
-                  fontFamily: BODY_FONT, 
-                  fontWeight: 300,
-                  fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' } 
-                }}>
-                  +61 423 440 056
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1.5 }}>
-                <EmailIcon sx={{ color: RED_COLOR, mr: 1.5, fontSize: { xs: '0.9rem', md: '1.2rem' }, flexShrink: 0 }} />
-                <Typography
-                  sx={{
-                  color: 'white', 
-                    fontSize: '16px',
-                  fontFamily: BODY_FONT, 
-                  fontWeight: 300,
-                    opacity: 0.8,
-                    mb: 0.5,
-                  }}
-                >
-                  motextransportau@gmail.com
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
-          
-          <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', my: { xs: 3, md: 4 } }} />
-          
-          <Typography variant="body2" align="center" sx={{ 
-            color: 'white', 
-            opacity: 0.7, 
-            fontFamily: BODY_FONT, 
-            fontWeight: 300,
-            fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' }
-          }}>
-            © {new Date().getFullYear()} MOTEX Transport. All rights reserved.
-          </Typography>
-        </Container>
-      </Box>
 
       {/* Mobile Menu */}
       <Drawer

@@ -25,16 +25,34 @@ import {
   List,
   ListItem,
   ListItemButton,
-  ListItemText
+  ListItemText,
+  BottomNavigation,
+  BottomNavigationAction,
+  Paper,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  Modal,
+  Fade,
+  Backdrop,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormLabel,
+  TextareaAutosize,
+  InputAdornment
 } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
+import dayjs, { Dayjs } from 'dayjs';
 import { 
   LocalShipping as LocalShippingIcon,
   LocationOn as LocationIcon,
   Phone as PhoneIcon,
   Email as EmailIcon,
-  ArrowForward as ArrowForwardIcon,
   Instagram as InstagramIcon,
   LinkedIn as LinkedInIcon,
   WhatsApp as WhatsAppIcon,
@@ -45,19 +63,29 @@ import {
   Apartment as ApartmentIcon,
   EventAvailable as EventAvailableIcon,
   Business as BusinessIcon,
-  Close as CloseIcon
+  Close as CloseIcon,
+  Home as HomeIcon,
+  Info as InfoIcon,
+  PhotoLibrary as PhotoLibraryIcon,
+  ContactSupport as ContactSupportIcon,
+  RequestQuote as RequestQuoteIcon,
+  ArrowForward as ArrowForwardIcon,
+  Search as SearchIcon
 } from '@mui/icons-material';
 
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 
 // Import fonts
-// Oswald font is loaded via Google Fonts in embedded code
-// Poppins and Bebas Neue fonts are loaded via Google Fonts in embedded code
+// Mulish font is loaded via Google Fonts in embedded code
 
 // Define color constants at the top of the file
 const RED_COLOR = '#DE1F27';
 const PINK_RED = '#FF2992'; 
 const CARD_BG_COLOR = "rgba(0, 0, 0, 0.8)";
+
+// Define font constants
+const HEADING_FONT = '"Mulish", sans-serif';
+const BODY_FONT = '"Mulish", sans-serif';
 
 const GradientBackground = styled(Box)(({ theme }) => ({
   background: '#000000',
@@ -119,6 +147,9 @@ const LogoContainer = styled(Box)(({ theme }) => ({
     right: 0,
     height: '1px',
     background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%)',
+  },
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(2, 0),
   }
 }));
 
@@ -317,7 +348,7 @@ const MobileServiceCarousel = ({ onServiceClick }: { onServiceClick: (serviceTit
                   align="center"
                   sx={{
                     color: 'white',
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: BODY_FONT,
                     fontWeight: 500,
                     fontSize: '0.75rem',
                     width: '100%',
@@ -354,6 +385,59 @@ const MobileServiceCarousel = ({ onServiceClick }: { onServiceClick: (serviceTit
     </AnimatePresence>
   );
 };
+
+// Style for the quote form modal
+const QuoteFormModal = styled(Modal)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
+
+const QuoteModalContent = styled(Box)(({ theme }) => ({
+  backgroundColor: '#0A0A0A',
+  borderRadius: '16px',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+  padding: theme.spacing(4),
+  width: '90%',
+  maxWidth: '800px',
+  maxHeight: '90vh',
+  overflow: 'auto',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
+  '&:focus': {
+    outline: 'none',
+  },
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(2),
+  },
+}));
+
+// QuoteBar styled component
+const QuoteBar = styled(Box)(({ theme }) => ({
+  backgroundColor: 'black',
+  borderRadius: '50px',
+  padding: theme.spacing(1.5, 2),
+  boxShadow: '0 8px 20px rgba(0, 0, 0, 0.25)',
+  width: '100%',
+  maxWidth: '900px',
+  margin: '0 auto',
+  zIndex: 15,
+  position: 'absolute',
+  top: 20,
+  left: '50%',
+  transform: 'translateX(-50%)',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
+  [theme.breakpoints.down('md')]: {
+    padding: theme.spacing(1, 1.5),
+    width: '95%',
+    top: 15
+  },
+  [theme.breakpoints.up('sm')]: {
+    top: 30
+  },
+  [theme.breakpoints.up('md')]: {
+    top: 40
+  }
+}));
 
 const LandingPage = () => {
   const handleServiceClick = (serviceTitle: string) => {
@@ -429,8 +513,8 @@ const LandingPage = () => {
     {
       id: 'interstate-delivery',
       title: "Interstate Delivery",
-      image: "/upscalemedia-transformed.jpeg",
       description: "Seamless interstate logistics solutions connecting businesses across Australia. Our fleet ensures safe and timely delivery across state lines.",
+      image: "/upscalemedia-transformed.jpeg",
     }
   ];
   
@@ -639,2274 +723,1317 @@ const LandingPage = () => {
     return () => clearInterval(interval);
   }, [handleNextTestimonialSlide, isMobile]);
 
+  const [bottomNavValue, setBottomNavValue] = useState(0);
+
+  // Form states
+  const [pickupSuburb, setPickupSuburb] = useState('');
+  const [deliverySuburb, setDeliverySuburb] = useState('');
+  const [quoteDate, setQuoteDate] = useState<Dayjs | null>(dayjs());
+  const [quoteTime, setQuoteTime] = useState<Dayjs | null>(dayjs());
+  const [openQuoteForm, setOpenQuoteForm] = useState(false);
+  
+  // Full form states
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [goodsDescription, setGoodsDescription] = useState('');
+  const [service, setService] = useState('');
+  const [dimensions, setDimensions] = useState({ length: '', width: '', height: '' });
+  const [pickupAccess, setPickupAccess] = useState('ground');
+  const [deliveryAccess, setDeliveryAccess] = useState('ground');
+  const [fragile, setFragile] = useState('no');
+  const [otherInfo, setOtherInfo] = useState('');
+  
+  // Handle quote form open/close
+  const handleOpenQuoteForm = () => {
+    setOpenQuoteForm(true);
+  };
+  
+  const handleCloseQuoteForm = () => {
+    setOpenQuoteForm(false);
+  };
+  
+  // Handle form submission
+  const handleQuoteSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Process the form data
+    console.log({
+      firstName,
+      lastName,
+      email,
+      pickupSuburb,
+      deliverySuburb,
+      quoteDate,
+      quoteTime,
+      goodsDescription,
+      service,
+      dimensions,
+      pickupAccess,
+      deliveryAccess,
+      fragile,
+      otherInfo
+    });
+    
+    // Close the form and maybe show a success message
+    handleCloseQuoteForm();
+    // Could navigate to quote success page or show success modal
+  };
+
+  // Return early if showing splash screen
+  if (showSplash) {
+    return <SplashScreen onFinish={handleSplashFinish} />;
+  }
+
   return (
     <>
       {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
       <GradientBackground>
-      {/* Add GlobalStyles for animations */}
-      <GlobalStyles
-        styles={{
-          '@keyframes slideLogos': {
-            '0%': {
-              transform: 'translateX(0)',
+        {/* Add GlobalStyles for animations */}
+        <GlobalStyles
+          styles={{
+            '@keyframes slideLogos': {
+              '0%': {
+                transform: 'translateX(0)',
+              },
+              '100%': {
+                transform: 'translateX(-50%)',
+              },
             },
-            '100%': {
-              transform: 'translateX(-50%)',
+            '@keyframes moveLeft': {
+              '0%': { transform: 'translateX(0)' },
+              '100%': { transform: 'translateX(-150px)' },
             },
-          },
-          '@keyframes moveLeft': {
-            '0%': { transform: 'translateX(0)' },
-            '100%': { transform: 'translateX(-150px)' },
-          },
-          '@keyframes moveRight': {
-            '0%': { transform: 'translateX(0)' },
-            '100%': { transform: 'translateX(150px)' },
-          },
-          '@keyframes pulse': {
-            '0%': { opacity: 0.15, transform: 'translate(-50%, -50%) scale(1)' },
-            '50%': { opacity: 0.25, transform: 'translate(-50%, -50%) scale(1.3)' },
-            '100%': { opacity: 0.15, transform: 'translate(-50%, -50%) scale(1)' },
-          },
-          '@keyframes buttonShine': {
-            '0%': { transform: 'translateX(-100%) translateY(-100%) rotate(45deg)' },
-            '20%, 100%': { transform: 'translateX(100%) translateY(100%) rotate(45deg)' },
-          },
-          '@keyframes shine': {
-            '0%': { left: '-100%' },
-            '20%, 100%': { left: '100%' }
-          },
-          '@keyframes ripple': {
-            '0%': { transform: 'scale(0.8)', opacity: 0.3 },
-            '50%': { transform: 'scale(1)', opacity: 0.5 },
-            '100%': { transform: 'scale(0.8)', opacity: 0.3 },
-          },
-        }}
-      />
-      <AppBar position="fixed" color="transparent" elevation={0} sx={{ py: 1, backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', zIndex: 1100 }}>
-        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          {/* Logo on the left */}
-          <Box sx={{ display: 'flex', alignItems: 'center', width: '20%' }}>
-            <Box 
-              component="button"
-              onClick={() => handleNavigation('/')}
-              sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                textDecoration: 'none',
-                background: 'none',
-                border: 'none',
-                padding: 0,
-                cursor: 'pointer' 
-              }}
-            >
+            '@keyframes moveRight': {
+              '0%': { transform: 'translateX(0)' },
+              '100%': { transform: 'translateX(150px)' },
+            },
+            '@keyframes pulse': {
+              '0%': { opacity: 0.15, transform: 'translate(-50%, -50%) scale(1)' },
+              '50%': { opacity: 0.25, transform: 'translate(-50%, -50%) scale(1.3)' },
+              '100%': { opacity: 0.15, transform: 'translate(-50%, -50%) scale(1)' },
+            },
+            '@keyframes buttonShine': {
+              '0%': { transform: 'translateX(-100%) translateY(-100%) rotate(45deg)' },
+              '20%, 100%': { transform: 'translateX(100%) translateY(100%) rotate(45deg)' },
+            },
+            '@keyframes shine': {
+              '0%': { left: '-100%' },
+              '20%, 100%': { left: '100%' }
+            },
+            '@keyframes ripple': {
+              '0%': { transform: 'scale(0.8)', opacity: 0.3 },
+              '50%': { transform: 'scale(1)', opacity: 0.5 },
+              '100%': { transform: 'scale(0.8)', opacity: 0.3 },
+            },
+          }}
+        />
+        
+        <AppBar position="fixed" color="transparent" elevation={0} sx={{ 
+          py: 1, 
+          backgroundColor: 'rgba(0, 0, 0, 0.85)', 
+          backdropFilter: 'blur(8px)', 
+          zIndex: 1100,
+          display: isMobile ? 'none' : 'flex' // Hide AppBar on mobile
+        }}>
+          <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            {/* Keep existing AppBar content */}
+            {/* Logo on the left */}
+            <Box sx={{ display: 'flex', alignItems: 'center', width: '20%' }}>
               <Box 
-                component="img" 
-                src="/MOTEX+Logo.png" 
-                alt="MOTEX Logo" 
-                sx={{ height: 28 }} 
-              />
-            </Box>
-          </Box>
-          
-          {/* Desktop menu in the center */}
-          {!isMobile && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', width: '60%' }}>
-              <Stack 
-                direction="row" 
-                spacing={3} 
+                component="button"
+                onClick={() => handleNavigation('/')}
                 sx={{ 
-                  color: 'white', 
-                  fontFamily: '"Poppins", sans-serif', 
-                  fontWeight: 400,
-                  justifyContent: 'center',
-                  fontSize: '16px',
-                  lineHeight: '29px',
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  textDecoration: 'none',
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer' 
                 }}
               >
-                <Link 
-                  component="button" 
-                  onClick={() => handleNavigation('/')} 
-                  color="inherit" 
-                  underline="none" 
-                  sx={{ 
-                    color: RED_COLOR, 
-                    '&:hover': { color: RED_COLOR },
-                    fontFamily: '"Poppins", sans-serif',
-                    fontSize: '16px',
-                    lineHeight: '29px',
-                    fontWeight: 400
-                  }}
-                >
-                  Home
-                </Link>
-                <Link 
-                  component="button" 
-                  onClick={() => handleNavigation('/services')}
-                  color="inherit" 
-                  underline="none" 
-                  sx={{ 
-                    '&:hover': { color: RED_COLOR },
-                    fontFamily: '"Poppins", sans-serif',
-                    fontSize: '16px',
-                    lineHeight: '29px',
-                    fontWeight: 400
-                  }}
-                >
-                  Services
-                </Link>
-                <Link 
-                  component="button" 
-                  onClick={() => handleNavigation('/about-us')}
-                  color="inherit" 
-                  underline="none" 
-                  sx={{ 
-                    '&:hover': { color: RED_COLOR },
-                    fontFamily: '"Poppins", sans-serif',
-                    fontSize: '16px',
-                    lineHeight: '29px',
-                    fontWeight: 400
-                  }}
-                >
-                  About Us
-                </Link>
-                <Link 
-                  component="button" 
-                  onClick={() => handleNavigation('/instant-quote')}
-                  color="inherit" 
-                  underline="none" 
-                  sx={{ 
-                    '&:hover': { color: RED_COLOR },
-                    fontFamily: '"Poppins", sans-serif',
-                    fontSize: '16px',
-                    lineHeight: '29px',
-                    fontWeight: 400
-                  }}
-                >
-                  Instant Quote
-                </Link>
-                <Link 
-                  component="button" 
-                  onClick={() => handleNavigation('/gallery')}
-                  color="inherit" 
-                  underline="none" 
-                  sx={{ 
-                    '&:hover': { color: RED_COLOR },
-                    fontFamily: '"Poppins", sans-serif',
-                    fontSize: '16px',
-                    lineHeight: '29px',
-                    fontWeight: 400
-                  }}
-                >
-                  Gallery
-                </Link>
-                <Link 
-                  component="button" 
-                  onClick={() => handleNavigation('/contact-us')}
-                  color="inherit" 
-                  underline="none" 
-                  sx={{ 
-                    '&:hover': { color: RED_COLOR },
-                    fontFamily: '"Poppins", sans-serif',
-                    fontSize: '16px',
-                    lineHeight: '29px',
-                    fontWeight: 400
-                  }}
-                >
-                  Contact
-                </Link>
-              </Stack>
+                <Box 
+                  component="img" 
+                  src="/MOTEX+Logo.png" 
+                  alt="MOTEX Logo" 
+                  sx={{ height: 28 }} 
+                />
+              </Box>
             </Box>
-          )}
-          
-          {/* Get A Quote button on the right */}
-          <Box sx={{ display: 'flex', width: '20%', justifyContent: 'flex-end' }}>
+            
+            {/* Desktop menu in the center */}
             {!isMobile && (
-              <Button 
-                component="button" 
-                onClick={() => handleNavigation('/instant-quote')} 
-                variant="contained" 
-                sx={{ 
-                  bgcolor: RED_COLOR, 
-                  color: 'white',
-                  textTransform: 'none',
-                  fontFamily: '"Poppins", sans-serif',
-                  fontWeight: 400,
-                  fontSize: '15px',
-                  borderRadius: '50px',
-                  px: 3,
-                  py: 1,
-                  minWidth: '130px',
-                  whiteSpace: 'nowrap',
-                  boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)',
-                  '&:hover': {
-                    bgcolor: '#c41922',
-                    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.25)'
-                  }
-                }}
-              >
-                Get&nbsp;a&nbsp;Quote
-              </Button>
+              <Box sx={{ display: 'flex', justifyContent: 'center', width: '60%' }}>
+                <Stack 
+                  direction="row" 
+                  spacing={3} 
+                  sx={{ 
+                    color: 'white', 
+                    fontFamily: BODY_FONT, 
+                    fontWeight: 400,
+                    justifyContent: 'center',
+                    fontSize: '16px',
+                    lineHeight: '29px',
+                  }}
+                >
+                  <Link 
+                    component="button" 
+                    onClick={() => handleNavigation('/')} 
+                    color="inherit" 
+                    underline="none" 
+                    sx={{ 
+                      color: RED_COLOR, 
+                      '&:hover': { color: RED_COLOR },
+                      fontFamily: BODY_FONT,
+                      fontSize: '16px',
+                      lineHeight: '29px',
+                      fontWeight: 400
+                    }}
+                  >
+                    Home
+                  </Link>
+                  <Link 
+                    component="button" 
+                    onClick={() => handleNavigation('/services')}
+                    color="inherit" 
+                    underline="none" 
+                    sx={{ 
+                      '&:hover': { color: RED_COLOR },
+                      fontFamily: BODY_FONT,
+                      fontSize: '16px',
+                      lineHeight: '29px',
+                      fontWeight: 400
+                    }}
+                  >
+                    Services
+                  </Link>
+                  <Link 
+                    component="button" 
+                    onClick={() => handleNavigation('/about-us')}
+                    color="inherit" 
+                    underline="none" 
+                    sx={{ 
+                      '&:hover': { color: RED_COLOR },
+                      fontFamily: BODY_FONT,
+                      fontSize: '16px',
+                      lineHeight: '29px',
+                      fontWeight: 400
+                    }}
+                  >
+                    About Us
+                  </Link>
+                  <Link 
+                    component="button" 
+                    onClick={() => handleNavigation('/instant-quote')}
+                    color="inherit" 
+                    underline="none" 
+                    sx={{ 
+                      '&:hover': { color: RED_COLOR },
+                      fontFamily: BODY_FONT,
+                      fontSize: '16px',
+                      lineHeight: '29px',
+                      fontWeight: 400
+                    }}
+                  >
+                    Instant Quote
+                  </Link>
+                  <Link 
+                    component="button" 
+                    onClick={() => handleNavigation('/gallery')}
+                    color="inherit" 
+                    underline="none" 
+                    sx={{ 
+                      '&:hover': { color: RED_COLOR },
+                      fontFamily: BODY_FONT,
+                      fontSize: '16px',
+                      lineHeight: '29px',
+                      fontWeight: 400
+                    }}
+                  >
+                    Gallery
+                  </Link>
+                  <Link 
+                    component="button" 
+                    onClick={() => handleNavigation('/contact-us')}
+                    color="inherit" 
+                    underline="none" 
+                    sx={{ 
+                      '&:hover': { color: RED_COLOR },
+                      fontFamily: BODY_FONT,
+                      fontSize: '16px',
+                      lineHeight: '29px',
+                      fontWeight: 400
+                    }}
+                  >
+                    Contact
+                  </Link>
+                </Stack>
+              </Box>
             )}
             
-            {/* Mobile menu icon */}
-            {isMobile && (
-              <IconButton
-                size="large"
-                edge="end"
-                color="inherit"
-                aria-label="menu"
-                onClick={() => setIsMobileMenuOpen(true)}
-                sx={{ color: 'white' }}
-              >
-                <MenuIcon />
-              </IconButton>
-            )}
-          </Box>
-        </Toolbar>
-      </AppBar>
-      
-      {/* Toolbar spacer to prevent content from being hidden under fixed AppBar */}
-      <Box sx={{ height: '64px' }} />
-      
-      {/* Update the Hero section to fix mobile text cropping */}
-      <Box 
-        sx={{ 
-          backgroundImage: 'url("/PHOTO-2025-03-22-21-36-54_1.jpg")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'center',
-          minHeight: { xs: '40.47vh', md: '55vh' },
-          overflow: 'hidden',
-          zIndex: 10,
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.25)',
-            zIndex: 1
-          }
-        }}
-      >
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2, pt: 2 }}>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            style={{ 
-              display: 'flex', 
-              flexDirection: 'column',
-              justifyContent: 'flex-start', 
-              alignItems: 'center' 
-            }}
-          >
+            {/* Get A Quote button on the right */}
+            <Box sx={{ display: 'flex', width: '20%', justifyContent: 'flex-end' }}>
+              {!isMobile && (
+                <Button 
+                  component="button" 
+                  onClick={() => handleNavigation('/instant-quote')} 
+                  variant="contained" 
+                  sx={{ 
+                    bgcolor: RED_COLOR, 
+                    color: 'white',
+                    textTransform: 'none',
+                    fontFamily: BODY_FONT,
+                    fontWeight: 400,
+                    fontSize: '15px',
+                    borderRadius: '50px',
+                    px: 3,
+                    py: 1,
+                    minWidth: '130px',
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)',
+                    '&:hover': {
+                      bgcolor: '#c41922',
+                      boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.25)'
+                    }
+                  }}
+                >
+                  Get&nbsp;a&nbsp;Quote
+                </Button>
+              )}
+              
+              {/* Mobile menu icon */}
+              {isMobile && (
+                <IconButton
+                  size="large"
+                  edge="end"
+                  color="inherit"
+                  aria-label="menu"
+                  onClick={() => setIsMobileMenuOpen(true)}
+                  sx={{ color: 'white' }}
+                >
+                  <MenuIcon />
+                </IconButton>
+              )}
+            </Box>
+          </Toolbar>
+        </AppBar>
+        
+        {/* Toolbar spacer to prevent content from being hidden under fixed AppBar - only for desktop */}
+        {!isMobile && <Box sx={{ height: '64px' }} />}
+        
+        {/* Update the Hero section with quote form */}
+        <Box 
+          sx={{ 
+            backgroundImage: 'url("/PHOTO-2025-03-22-21-36-54_1.jpg")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: { xs: '35vh', sm: '40vh', md: '55vh' },
+            overflow: 'hidden',
+            zIndex: 10,
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.35)',
+              zIndex: 1
+            }
+          }}
+        >
+          {/* Quote Bar Form - Updated with black background and red accents */}
+          <QuoteBar>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <Grid container spacing={1} alignItems="center">
+                <Grid item xs={4.5} sm={5} md={4.5}>
+                  <TextField
+                    fullWidth
+                    placeholder="Pickup suburb"
+                    variant="standard"
+                    value={pickupSuburb}
+                    onChange={(e) => setPickupSuburb(e.target.value)}
+                    InputProps={{
+                      disableUnderline: true,
+                      startAdornment: isMobile ? null : (
+                        <InputAdornment position="start">
+                          <LocationIcon sx={{ color: RED_COLOR, fontSize: { xs: 18, sm: 20 } }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      '& .MuiInput-root': {
+                        padding: { xs: '4px 8px', sm: '8px 12px' },
+                        fontSize: { xs: '0.85rem', sm: 'inherit' },
+                        borderRadius: '30px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: `1px solid ${RED_COLOR}25`,
+                        color: 'white',
+                      },
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={4.5} sm={5} md={4.5}>
+                  <TextField
+                    fullWidth
+                    placeholder="Delivery suburb"
+                    variant="standard"
+                    value={deliverySuburb}
+                    onChange={(e) => setDeliverySuburb(e.target.value)}
+                    InputProps={{
+                      disableUnderline: true,
+                      startAdornment: isMobile ? null : (
+                        <InputAdornment position="start">
+                          <LocationIcon sx={{ color: RED_COLOR, fontSize: { xs: 18, sm: 20 } }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      '& .MuiInput-root': {
+                        padding: { xs: '4px 8px', sm: '8px 12px' },
+                        fontSize: { xs: '0.85rem', sm: 'inherit' },
+                        borderRadius: '30px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: `1px solid ${RED_COLOR}25`,
+                        color: 'white',
+                      },
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={0} sm={0} md={2} sx={{ display: { xs: 'none', md: 'block' } }}>
+                  <DatePicker
+                    value={quoteDate}
+                    onChange={(newDate) => setQuoteDate(newDate)}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        variant: "standard",
+                        InputProps: {
+                          disableUnderline: true,
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <EventAvailableIcon sx={{ color: RED_COLOR, fontSize: 20 }} />
+                            </InputAdornment>
+                          ),
+                        },
+                        sx: {
+                          '& .MuiInput-root': {
+                            padding: '8px 12px',
+                            borderRadius: '30px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            border: `1px solid ${RED_COLOR}25`,
+                            color: 'white',
+                          },
+                          '& .MuiSvgIcon-root': {
+                            color: 'white',
+                          },
+                        }
+                      }
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={1.5} sm={1} md={0} sx={{ display: { xs: 'block', md: 'none' } }}>
+                  <IconButton
+                    onClick={() => {
+                      // Show date picker modal for mobile
+                      const dateInput = document.createElement('input');
+                      dateInput.type = 'date';
+                      dateInput.style.position = 'absolute';
+                      dateInput.style.opacity = '0';
+                      dateInput.style.height = '0';
+                      dateInput.style.width = '0';
+                      dateInput.style.zIndex = '-1';
+                      
+                      // Set default date to today formatted as YYYY-MM-DD
+                      const today = new Date();
+                      const year = today.getFullYear();
+                      const month = String(today.getMonth() + 1).padStart(2, '0');
+                      const day = String(today.getDate()).padStart(2, '0');
+                      dateInput.defaultValue = `${year}-${month}-${day}`;
+                      
+                      // Add to DOM, trigger click, and handle the change
+                      document.body.appendChild(dateInput);
+                      dateInput.click();
+                      
+                      dateInput.addEventListener('change', (e) => {
+                        const target = e.target as HTMLInputElement;
+                        const selectedDate = new Date(target.value);
+                        setQuoteDate(dayjs(selectedDate));
+                        document.body.removeChild(dateInput);
+                      });
+                      
+                      // Remove if closed without selection
+                      dateInput.addEventListener('blur', () => {
+                        if (document.body.contains(dateInput)) {
+                          document.body.removeChild(dateInput);
+                        }
+                      });
+                    }}
+                    sx={{
+                      bgcolor: 'rgba(255, 255, 255, 0.05)',
+                      color: RED_COLOR,
+                      width: { xs: '32px', sm: '36px' },
+                      height: { xs: '32px', sm: '36px' },
+                      border: `1px solid ${RED_COLOR}25`,
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.1)',
+                      },
+                    }}
+                    aria-label="Select Date"
+                  >
+                    <EventAvailableIcon fontSize="small" />
+                  </IconButton>
+                </Grid>
+                <Grid item xs={1.5} sm={1} md={1}>
+                  <IconButton
+                    onClick={handleOpenQuoteForm}
+                    sx={{
+                      bgcolor: RED_COLOR,
+                      color: 'white',
+                      width: { xs: '32px', sm: '36px', md: '44px' },
+                      height: { xs: '32px', sm: '36px', md: '44px' },
+                      '&:hover': {
+                        bgcolor: '#c41922',
+                      },
+                    }}
+                    aria-label="Get Quote"
+                  >
+                    <SearchIcon fontSize={isMobile ? "small" : "medium"} />
+                  </IconButton>
+                </Grid>
+              </Grid>
+            </LocalizationProvider>
+          </QuoteBar>
+          
+          <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            {/* Empty container for spacing */}
+          </Container>
+        </Box>
+
+        {/* Service Categories Section */}
+        <Box sx={{ position: 'relative', my: 6, zIndex: 5 }}>
+          <Container maxWidth="lg">
             <Typography 
               variant="h2" 
               align="center" 
               sx={{ 
-                mb: 1,
-                fontWeight: 800,
-                color: 'transparent',
-                fontFamily: '"Bebas Neue", sans-serif',
-                fontSize: { xs: '45px', sm: '55px', md: '85px', lg: '95px' },
-                letterSpacing: { xs: '1px', sm: '2px', md: '3px' },
-                WebkitTextStroke: { xs: `0.5px ${RED_COLOR}`, sm: `1.5px ${RED_COLOR}`, md: `2px ${RED_COLOR}` },
-                textStroke: { xs: `0.5px ${RED_COLOR}`, sm: `1.5px ${RED_COLOR}`, md: `2px ${RED_COLOR}` },
-                mt: 0
+                fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.25rem' },
+                fontWeight: 700,
+                mb: { xs: 2, sm: 3, md: 4 },
+                color: 'white',
+                fontFamily: HEADING_FONT
               }}
             >
-              <TextFade direction="down" staggerChildren={0.03}>
-                <div style={{ whiteSpace: 'nowrap' }}>
-                  Above and Beyond with 
-                </div>
-                <div style={{ whiteSpace: 'nowrap', marginTop: '-10px' }}>
-                  Motex Transport
-                </div>
-              </TextFade>
+              OUR SERVICES
             </Typography>
-          </motion.div>
-        </Container>
-      </Box>
-
-      {/* Service Categories Section */}
-      <Box sx={{ position: 'relative', mt: { xs: -6.5, sm: -8 }, mb: 6, zIndex: 10 }}>
-        <Container maxWidth="lg" sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Box 
-            sx={{ 
-              width: { xs: '95%', sm: '100%' },
-              maxWidth: { xs: '1100px', sm: '1200px' },
-              mx: 'auto',
-              bgcolor: '#0A0A0A',
-              borderRadius: '12px',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
-              py: { xs: 1.5, sm: 1.5 },
-              px: { xs: 1.5, md: 4 },
-              border: '1px solid rgba(222, 31, 39, 0.15)'
-            }}
-          >
-            {/* Mobile view with rotating services - more compact */}
-            <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
-              <MobileServiceCarousel onServiceClick={handleServiceClick} />
-            </Box>
-
-            {/* Desktop view with all services */}
-            <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-              <Grid container spacing={0}>
-                {/* Parcel Delivery */}
-                <Grid item sm sx={{ borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                  <Box
-                    onClick={() => handleServiceClick("Parcel Delivery")}
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      py: 1.5,
-                      px: 1.5,
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s ease',
-                      '&:hover': {
-                        transform: 'translateY(-3px)',
-                        '& .service-title': {
-                          color: RED_COLOR,
-                        }
-                      }
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: 52,
-                        height: 52,
-                        bgcolor: 'rgba(222, 31, 39, 0.08)',
-                        borderRadius: '10px',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        mb: 1,
-                      }}
-                    >
-                      <LocalShippingIcon sx={{ color: RED_COLOR, fontSize: 28 }} />
-                    </Box>
-                    <Typography
-                      className="service-title"
-                      align="center"
-                      sx={{
-                        color: 'white',
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 500,
-                        fontSize: '0.9rem',
-                        transition: 'color 0.2s ease',
-                      }}
-                    >
-                      Parcel Delivery
-                    </Typography>
-                  </Box>
-                </Grid>
-
-                {/* Transport */}
-                <Grid item sm sx={{ borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                  <Box
-                    onClick={() => handleServiceClick("Fragile Freight")}
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      py: 1.5,
-                      px: 1.5,
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s ease',
-                      '&:hover': {
-                        transform: 'translateY(-3px)',
-                        '& .service-title': {
-                          color: RED_COLOR,
-                        }
-                      }
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: 52,
-                        height: 52,
-                        bgcolor: 'rgba(222, 31, 39, 0.08)',
-                        borderRadius: '10px',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        mb: 1,
-                      }}
-                    >
-                      <BusinessIcon sx={{ color: RED_COLOR, fontSize: 28 }} />
-                    </Box>
-                    <Typography
-                      className="service-title"
-                      align="center"
-                      sx={{
-                        color: 'white',
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 500,
-                        fontSize: '0.9rem',
-                        transition: 'color 0.2s ease',
-                      }}
-                    >
-                      Fragile Freight
-                    </Typography>
-                  </Box>
-                </Grid>
-
-                {/* Packers & Movers */}
-                <Grid item sm sx={{ borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                  <Box
-                    onClick={() => handleServiceClick("Interstate Delivery")}
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      py: 1.5,
-                      px: 1.5,
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s ease',
-                      '&:hover': {
-                        transform: 'translateY(-3px)',
-                        '& .service-title': {
-                          color: RED_COLOR,
-                        }
-                      }
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: 52,
-                        height: 52,
-                        bgcolor: 'rgba(222, 31, 39, 0.08)',
-                        borderRadius: '10px',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        mb: 1,
-                      }}
-                    >
-                      <InventoryIcon sx={{ color: RED_COLOR, fontSize: 28 }} />
-                    </Box>
-                    <Typography
-                      className="service-title"
-                      align="center"
-                      sx={{
-                        color: 'white',
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 500,
-                        fontSize: '0.9rem',
-                        transition: 'color 0.2s ease',
-                      }}
-                    >
-                      Interstate Delivery
-                    </Typography>
-                  </Box>
-                </Grid>
-
-                {/* Courier */}
-                <Grid item sm sx={{ borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                  <Box
-                    onClick={() => handleServiceClick("Door to Door Service")}
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      py: 1.5,
-                      px: 1.5,
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s ease',
-                      '&:hover': {
-                        transform: 'translateY(-3px)',
-                        '& .service-title': {
-                          color: RED_COLOR,
-                        }
-                      }
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: 52,
-                        height: 52,
-                        bgcolor: 'rgba(222, 31, 39, 0.08)',
-                        borderRadius: '10px',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        mb: 1,
-                      }}
-                    >
-                      <PublicIcon sx={{ color: RED_COLOR, fontSize: 28 }} />
-                    </Box>
-                    <Typography
-                      className="service-title"
-                      align="center"
-                      sx={{
-                        color: 'white',
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 500,
-                        fontSize: '0.9rem',
-                        transition: 'color 0.2s ease',
-                      }}
-                    >
-                      Door to Door Service
-                    </Typography>
-                  </Box>
-                </Grid>
-
-                {/* Same Day */}
-                <Grid item sm sx={{ borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                  <Box
-                    onClick={() => handleServiceClick("Same Day Delivery")}
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      py: 1.5,
-                      px: 1.5,
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s ease',
-                      '&:hover': {
-                        transform: 'translateY(-3px)',
-                        '& .service-title': {
-                          color: RED_COLOR,
-                        }
-                      }
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: 52,
-                        height: 52,
-                        bgcolor: 'rgba(222, 31, 39, 0.08)',
-                        borderRadius: '10px',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        mb: 1,
-                      }}
-                    >
-                      <SpeedIcon sx={{ color: RED_COLOR, fontSize: 28 }} />
-                    </Box>
-                    <Typography
-                      className="service-title"
-                      align="center"
-                      sx={{
-                        color: 'white',
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 500,
-                        fontSize: '0.9rem',
-                        transition: 'color 0.2s ease',
-                      }}
-                    >
-                      Same Day Delivery
-                    </Typography>
-                  </Box>
-                </Grid>
-
-                {/* Chauffeur */}
-                <Grid item sm sx={{ borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                  <Box
-                    onClick={() => handleServiceClick("Chauffeur")}
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      py: 1.5,
-                      px: 1.5,
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s ease',
-                      '&:hover': {
-                        transform: 'translateY(-3px)',
-                        '& .service-title': {
-                          color: RED_COLOR,
-                        }
-                      }
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: 52,
-                        height: 52,
-                        bgcolor: 'rgba(222, 31, 39, 0.08)',
-                        borderRadius: '10px',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        mb: 1,
-                      }}
-                    >
-                      <ApartmentIcon sx={{ color: RED_COLOR, fontSize: 28 }} />
-                    </Box>
-                    <Typography
-                      className="service-title"
-                      align="center"
-                      sx={{
-                        color: 'white',
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 500,
-                        fontSize: '0.9rem',
-                        transition: 'color 0.2s ease',
-                      }}
-                    >
-                      Chauffeur
-                    </Typography>
-                  </Box>
-                </Grid>
-
-                {/* Get a Quote button */}
-                <Grid 
-                  item 
-                  sm="auto"
-                  sx={{ 
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    px: 4
-                  }}
-                >
-                  <Button
-                    onClick={() => handleNavigation('/instant-quote')}
+            
+            <Grid container spacing={3}>
+              {serviceCards.map((service) => (
+                <Grid item xs={4} sm={6} md={4} key={service.id}>
+                  <ServiceCard 
+                    onClick={() => handleServiceClick(service.title)}
                     sx={{ 
-                      backgroundColor: RED_COLOR, 
-                      color: 'white',
-                      textTransform: 'none',
-                      fontFamily: '"Poppins", sans-serif',
-                      fontWeight: 500,
-                      fontSize: '16px',
-                      borderRadius: '50px',
-                      px: 3.5,
-                      py: 1.25,
-                      minWidth: '140px',
-                      whiteSpace: 'nowrap',
-                      boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)',
-                      position: 'relative',
+                      height: '100%',
                       overflow: 'hidden',
-                      '&:hover': {
-                        backgroundColor: '#c41922',
-                        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.25)'
-                      }
+                      borderRadius: '12px',
+                      position: 'relative',
+                      display: 'flex',
+                      flexDirection: 'column'
                     }}
                   >
-                    Get&nbsp;a&nbsp;Quote
-                    <Box 
-                      component="span" 
+                    <CardMedia
+                      component="img"
+                      image={service.image}
+                      alt={service.title}
                       sx={{ 
-                        display: 'inline-flex', 
-                        alignItems: 'center', 
-                        ml: 0.5,
-                        fontSize: '1rem'
+                        height: { xs: 100, sm: 180, md: 200 },
+                        objectFit: 'cover',
+                        transition: 'transform 0.5s ease',
+                        '&:hover': {
+                          transform: 'scale(1.05)',
+                        },
                       }}
-                    >
-                      →
+                    />
+                    <Box sx={{ 
+                      p: { xs: 1, sm: 2 },
+                      backgroundColor: 'rgba(0,0,0,0.7)',
+                      flexGrow: 1,
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}>
+                      <Typography 
+                        className="service-title"
+                        variant="h6" 
+                        sx={{ 
+                          color: 'white',
+                          fontFamily: HEADING_FONT,
+                          fontWeight: 600,
+                          mb: { xs: 0, sm: 1 },
+                          fontSize: { xs: '0.8rem', sm: '1rem', md: '1.25rem' }
+                        }}
+                      >
+                        {service.title}
+                      </Typography>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          color: 'rgba(255,255,255,0.8)',
+                          display: { xs: 'none', sm: 'block' },
+                          fontFamily: BODY_FONT,
+                          fontSize: '0.85rem',
+                          mb: 0
+                        }}
+                      >
+                        {service.description.length > 70 ? service.description.substring(0, 70) + '...' : service.description}
+                      </Typography>
                     </Box>
-                  </Button>
+                  </ServiceCard>
                 </Grid>
-              </Grid>
-            </Box>
-          </Box>
-        </Container>
-      </Box>
-
-      {/* Wrap all content except hero section in a ContentSection with mouse gradient effect */}
-      <Box ref={contentSectionRef} sx={{ position: 'relative', overflow: 'hidden' }}>
-        {/* Mouse follower gradient light - positioned relative to viewport */}
-        <GradientLight 
-          sx={{ 
-            left: mousePos.x,
-            top: mousePos.y,
-            width: isMoving ? '600px' : '400px',
-            height: isMoving ? '600px' : '400px',
-            opacity: isMoving ? 0.85 : 0.7,
-            position: 'fixed',
-            pointerEvents: 'none',
-            zIndex: 1
-          }} 
-        />
-
-        {/* Services Section */}
-        <Box id="services-section" sx={{ pt: -1, pb:6 , position: 'relative', zIndex: 2 }}>
-          <Container maxWidth="lg">
-            <motion.div
-              initial={{ opacity: 0, y: isMobile ? 10 : 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: isMobile ? 0.3 : 0.6 }}
-            >
-              <Typography variant="h2" align="center" sx={{ 
-                fontSize: { xs: '1.75rem', sm: '2.25rem', md: '3.5rem' },
-                fontWeight: 700,
-                mb: { xs: 1, md: 2 },
-                color: 'white',
-                fontFamily: '"Oswald", sans-serif',
-              }}>
-                OUR SERVICES
-              </Typography>
-            </motion.div>
-            <Typography variant="body1" align="center" sx={{ 
-              maxWidth: 700,
-              mx: 'auto',
-              mb: { xs: 3, md: 6 },
-              color: 'rgba(255, 255, 255, 0.65)',
-              fontFamily: '"Poppins", sans-serif',
-              fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
-            }}>
-              From local deliveries to interstate transport, our comprehensive range of services is designed to meet all your logistics needs with efficiency and reliability.
-            </Typography>
-            
-            <CarouselContainer>
-              {/* Carousel Track */}
-              <CarouselTrack 
-                ref={carouselRef}
-                sx={{ 
-                  transform: `translateX(-${activeSlide * 100}%)`,
-                }}
-                onMouseDown={handleDragStart}
-                onMouseMove={handleDragMove}
-                onMouseUp={handleDragEnd}
-                onMouseLeave={handleDragEnd}
-                onTouchStart={handleDragStart}
-                onTouchMove={handleDragMove}
-                onTouchEnd={handleDragEnd}
-              >
-                {isMobile ? 
-                  // Mobile view - 2 cards per slide
-                  slides.map((slide) => (
-                    <Box 
-                      key={slide.id} 
-                      sx={{ 
-                        display: 'flex', 
-                        flexWrap: 'wrap',
-                        width: '100%',
-                        flexShrink: 0,
-                        gap: 0 // Remove gap between cards
-                      }}
-                    >
-                      {slide.services.map((card) => (
-                        <Box 
-                          key={card.id} 
-                          sx={{ 
-                            p: { xs: 1, sm: 2 }, // Add padding between cards
-                            width: '50%' // Mobile always shows 2 cards (50% width)
-                          }}
-                        >
-                          <ServiceCard onClick={() => handleServiceClick(card.title)}>
-                            <CardMedia
-                              component="img"
-                              height={100}
-                              image={card.image}
-                              alt={card.title}
-                              sx={{ 
-                                opacity: 0.8,
-                                height: { xs: 100, sm: 150 }
-                              }}
-                            />
-                            <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
-                              <Typography 
-                                variant="h5" 
-                                className="service-title"
-                                sx={{ 
-                                  mb: { xs: 0.5, sm: 1 },
-                                  fontWeight: 600,
-                                  color: 'white',
-                                  fontFamily: '"Poppins", sans-serif',
-                                  fontSize: { xs: '0.9rem', sm: '1.1rem' }
-                                }}
-                              >
-                                {card.title}
-                              </Typography>
-                              <Typography 
-                                variant="body2" 
-                                sx={{ 
-                                  color: 'rgba(255,255,255,0.7)',
-                                  fontFamily: '"Poppins", sans-serif',
-                                  lineHeight: '1.5',
-                                  fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                                  fontWeight: 400,
-                                  display: { xs: 'none', sm: 'block' }
-                                }}
-                              >
-                                {card.description}
-                              </Typography>
-                            </CardContent>
-                          </ServiceCard>
-                        </Box>
-                      ))}
-                    </Box>
-                  ))
-                : 
-                  // Desktop view - 3 cards per slide
-                  desktopSlides.map((slide) => (
-                    <Box 
-                      key={slide.id} 
-                      sx={{ 
-                        display: 'flex', 
-                        flexWrap: 'wrap',
-                        width: '100%',
-                        flexShrink: 0,
-                        gap: 0 // Remove gap between cards
-                      }}
-                    >
-                      {slide.services.map((card) => (
-                        <Box 
-                          key={card.id} 
-                          sx={{ 
-                            p: 2, // Add padding between cards
-                            width: '33.333%' // Desktop shows 3 cards (33.333% width)
-                          }}
-                        >
-                          <ServiceCard onClick={() => handleServiceClick(card.title)}>
-                            <CardMedia
-                              component="img"
-                              height={200}
-                              image={card.image}
-                              alt={card.title}
-                              sx={{ 
-                                opacity: 0.8,
-                                height: 200
-                              }}
-                            />
-                            <CardContent sx={{ p: 3 }}>
-                              <Typography 
-                                variant="h5" 
-                                className="service-title"
-                                sx={{ 
-                                  mb: 2,
-                                  fontWeight: 600,
-                                  color: 'white',
-                                  fontFamily: '"Poppins", sans-serif',
-                                  fontSize: '1.5rem'
-                                }}
-                              >
-                                {card.title}
-                              </Typography>
-                              <Typography 
-                                variant="body2" 
-                                sx={{ 
-                                  color: 'rgba(255,255,255,0.7)',
-                                  fontFamily: '"Poppins", sans-serif',
-                                  lineHeight: '1.5',
-                                  fontSize: '16px',
-                                  fontWeight: 400
-                                }}
-                              >
-                                {card.description}
-                              </Typography>
-                            </CardContent>
-                          </ServiceCard>
-                        </Box>
-                      ))}
-                    </Box>
-                  ))
-                }
-              </CarouselTrack>
-            </CarouselContainer>
-            
-            {/* Dots indicator for current slide - changes based on view */}
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
-              {isMobile ? 
-                // Mobile - 3 dots (3 slides with 2 cards each)
-                [
-                  { id: 'dot-first-slide', value: 0 }, 
-                  { id: 'dot-second-slide', value: 1 },
-                  { id: 'dot-third-slide', value: 2 }
-                ].map((dot) => (
-                  <Box
-                    key={dot.id}
-                    sx={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: '50%',
-                      mx: 0.5,
-                      cursor: 'pointer',
-                      backgroundColor: dot.value === activeSlide ? RED_COLOR : 'rgba(255,255,255,0.3)',
-                      transition: 'background-color 0.3s',
-                    }}
-                    onClick={() => setActiveSlide(dot.value)}
-                  />
-                ))
-              : 
-                // Desktop - 2 dots (2 slides with 3 cards each)
-                [
-                  { id: 'dot-desktop-first-slide', value: 0 }, 
-                  { id: 'dot-desktop-second-slide', value: 1 }
-                ].map((dot) => (
-                  <Box
-                    key={dot.id}
-                    sx={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: '50%',
-                      mx: 0.5,
-                      cursor: 'pointer',
-                      backgroundColor: dot.value === activeSlide ? RED_COLOR : 'rgba(255,255,255,0.3)',
-                      transition: 'background-color 0.3s',
-                    }}
-                    onClick={() => setActiveSlide(dot.value)}
-                  />
-                ))
-              }
-            </Box>
-            
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-              <Button 
-                component={RouterLink}
-                to="/services"
-                variant="outlined" 
-                endIcon={<ArrowForwardIcon />}
-                sx={{ 
-                  color: 'white',
-                  borderColor: 'rgba(255, 255, 255, 0.3)',
-                  textTransform: 'none',
-                  fontFamily: '"Poppins", sans-serif',
-                  fontWeight: 400,
-                  fontSize: '15px',
-                  borderRadius: '50px',
-                  px: 3,
-                  py: 1,
-                  '&:hover': {
-                    borderColor: RED_COLOR,
-                    bgcolor: 'rgba(222, 31, 39, 0.1)'
-                  }
-                }}
-              >
-                View All Services
-              </Button>
-            </Box>
-          </Container>
-        </Box>
-
-        {/* Decorative Line */}
-        <DecorativeLine />
-
-        <LogoContainer>
-          <Container maxWidth="lg" sx={{ textAlign: 'center' }}>
-            <Typography variant="h6" sx={{ 
-              color: 'white',
-              mb: 4, 
-              letterSpacing: 1, 
-              fontWeight: 800,
-              fontFamily: '"Oswald", sans-serif'
-            }}>
-              TRUSTED BY
-            </Typography>
-            
-            
-            <Box className="logo-slide-container">
-              <Box className="logo-slide">
-                {[
-                  { src: "/Sydney+Visitor+Centre_Small.png", alt: "Sydney Visitor Centre", id: "svc-1" },
-                  { src: "/motex-transport-hunter-valley-wedding-planner.png", alt: "Hunter Valley Wedding Planner", id: "hvwp-1" },
-                  { src: "/motex-transport-cwci-logo.png", alt: "CWCI", id: "cwci-1" },
-                  { src: "/Sydney+Visitor+Centre_Small.png", alt: "Sydney Visitor Centre", id: "svc-2" },
-                  { src: "/motex-transport-hunter-valley-wedding-planner.png", alt: "Hunter Valley Wedding Planner", id: "hvwp-2" },
-                  { src: "/motex-transport-cwci-logo.png", alt: "CWCI", id: "cwci-2" }
-                ].map((logo) => (
-                  <Box 
-                    key={logo.id}
-                    component="img" 
-                    src={logo.src} 
-                    alt={logo.alt}
-                    sx={{
-                      height: '60px',
-                      mx: 6,
-                      opacity: 1,
-                      transition: 'transform 0.3s',
-                      filter: 'brightness(1)',
-                      '&:hover': {
-                        transform: 'scale(1.05)',
-                      }
-                    }}
-                  />
-                ))}
-              </Box>
-            </Box>
-          </Container>
-        </LogoContainer>
-
-        {/* Decorative Line */}
-        <DecorativeLine />
-
-        {/* Why Choose Us Section */}
-        <Box sx={{ 
-          py: 10, 
-          backgroundColor: '#000000',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          {/* Circular/Elliptical background patterns - increased size and added animation */}
-          <CircleBackground sx={{ 
-            top: '10%', 
-            left: '5%',
-            width: '350px', // Increased size
-            height: '350px', // Increased size
-            animation: 'pulse 8s infinite ease-in-out',
-          }} />
-          <CircleBackground sx={{ 
-            top: '30%', 
-            right: '8%', 
-            width: '280px', // Increased size
-            height: '280px', // Increased size
-            background: 'radial-gradient(circle, rgba(255, 41, 146, 0.8) 0%, rgba(0,0,0,0) 70%)',
-            animation: 'pulse 12s infinite ease-in-out',
-          }} />
-          <CircleBackground sx={{ 
-            bottom: '15%', 
-            left: '15%', 
-            width: '400px', // Increased size
-            height: '400px', // Increased size
-            background: 'radial-gradient(circle, rgba(117, 57, 255, 0.7) 0%, rgba(0,0,0,0) 70%)',
-            animation: 'pulse 10s infinite ease-in-out',
-          }} />
-          <CircleBackground sx={{ 
-            bottom: '25%', 
-            right: '15%', 
-            width: '320px', // Increased size
-            height: '320px', // Increased size
-            animation: 'pulse 14s infinite ease-in-out',
-          }} />
-          
-          <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-            <Typography variant="h2" align="center" sx={{ 
-              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '3.5rem' },
-              fontWeight: 700,
-              mb: { xs: 1, md: 2 },
-              color: 'white',
-              fontFamily: '"Oswald", sans-serif',
-            }}>
-              WHAT WE OFFER
-            </Typography>
-            
-            <Typography variant="body1" align="center" sx={{ 
-              maxWidth: 700,
-              mx: 'auto',
-              mb: { xs: 3, md: 6 },
-              color: 'rgba(255, 255, 255, 0.65)',
-              fontFamily: '"Poppins", sans-serif',
-              fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
-            }}>
-              MOTEX Transport provides comprehensive logistics solutions designed to meet your specific business needs with reliability and efficiency.
-            </Typography>
-            
-            <Grid 
-              container 
-              spacing={{ xs: 2, md: 3 }} 
-              justifyContent="center"
-              alignItems="stretch"
-            >
-              {/* Dedicated Drivers */}
-              <Grid item xs={6} md={4}>
-                <Card
-                  sx={{
-                    background: CARD_BG_COLOR,
-                    height: "100%",
-                    borderRadius: "16px",
-                    p: { xs: 2, md: 3 },
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                    cursor: "pointer",
-                    transition: "transform 0.3s ease",
-                    "&:hover": {
-                      transform: "translateY(-8px)",
-                      "& .section-heading": {
-                        color: RED_COLOR
-                      }
-                    },
-                  }}
-                >
-                  <CardContent sx={{ p: { xs: 1, md: 2 } }}>
-                    <Typography 
-                      variant="h4"
-                      className="section-heading" 
-                      sx={{ 
-                        mb: { xs: 1, md: 2 },
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 700,
-                        color: 'white',
-                        transition: 'color 0.3s ease',
-                        fontSize: { xs: '1.25rem', md: '1.5rem' }
-                      }}
-                    >
-                      Dedicated Drivers
-                    </Typography>
-                    <Typography 
-                      variant="body1" 
-                      sx={{ 
-                        mb: { xs: 2, md: 3 },
-                        color: 'rgba(255, 255, 255, 0.65)',
-                        fontFamily: '"Poppins", sans-serif',
-                        minHeight: { xs: '40px', md: '60px' },
-                        fontSize: { xs: '0.85rem', md: '1rem' }
-                      }}
-                    >
-                      Professional drivers who meet your service standards.
-                    </Typography>
-                    
-                    <Divider sx={{ my: { xs: 1.5, md: 3 }, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
-                    
-                    <Box sx={{ mb: 3, display: { xs: 'none', sm: 'block' } }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 1, md: 2 } }}>
-                        <Box 
-                          sx={{ 
-                            width: '8px', 
-                            height: '8px', 
-                            borderRadius: '50%', 
-                            backgroundColor: '#DE1F27', 
-                            mr: 1.5,
-                            flexShrink: 0
-                          }} 
-                        />
-                        <Typography variant="body2" sx={{ 
-                          color: 'white',
-                          fontFamily: '"Poppins", sans-serif',
-                          fontSize: { xs: '0.8rem', md: '1rem' }
-                        }}>
-                          Customer service focused
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 1, md: 2 } }}>
-                        <Box 
-                          sx={{ 
-                            width: '8px', 
-                            height: '8px', 
-                            borderRadius: '50%', 
-                            backgroundColor: '#DE1F27', 
-                            mr: 1.5,
-                            flexShrink: 0
-                          }} 
-                        />
-                        <Typography variant="body2" sx={{ 
-                          color: 'white',
-                          fontFamily: '"Poppins", sans-serif',
-                          fontSize: { xs: '0.8rem', md: '1rem' }
-                        }}>
-                          Strong communication skills
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', mb: { xs: 1, md: 2 } }}>
-                        <Box 
-                          sx={{ 
-                            width: '8px', 
-                            height: '8px', 
-                            borderRadius: '50%', 
-                            backgroundColor: '#DE1F27', 
-                            mr: 1.5,
-                            flexShrink: 0
-                          }} 
-                        />
-                        <Typography variant="body2" sx={{ 
-                          color: 'white',
-                          fontFamily: '"Poppins", sans-serif',
-                          fontSize: { xs: '0.8rem', md: '1rem' }
-                        }}>
-                          Professional presentation
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', mb: { xs: 1, md: 2 } }}>
-                        <Box 
-                          sx={{ 
-                            width: '8px', 
-                            height: '8px', 
-                            borderRadius: '50%', 
-                            backgroundColor: '#DE1F27', 
-                            mr: 1.5,
-                            flexShrink: 0
-                          }} 
-                        />
-                        <Typography variant="body2" sx={{ 
-                          color: 'white',
-                          fontFamily: '"Poppins", sans-serif',
-                          fontSize: { xs: '0.8rem', md: '1rem' }
-                        }}>
-                          Timely deliveries guaranteed
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-              
-              {/* Skilled Equipment Operators */}
-              <Grid item xs={6} md={4}>
-                <Card
-                  sx={{
-                    background: CARD_BG_COLOR,
-                    height: "100%",
-                    borderRadius: "16px",
-                    p: { xs: 2, md: 3 },
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                    cursor: "pointer",
-                    transition: "transform 0.3s ease",
-                    "&:hover": {
-                      transform: "translateY(-8px)",
-                      "& .section-heading": {
-                        color: RED_COLOR
-                      }
-                    },
-                  }}
-                >
-                  <CardContent sx={{ p: { xs: 1, md: 2 } }}>
-                    <Typography 
-                      variant="h4"
-                      className="section-heading" 
-                      sx={{ 
-                        mb: { xs: 1, md: 2 },
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 700,
-                        color: 'white',
-                        transition: 'color 0.3s ease',
-                        fontSize: { xs: '1.25rem', md: '1.5rem' }
-                      }}
-                    >
-                      Skilled Operators
-                    </Typography>
-                    <Typography variant="body1" sx={{ 
-                      mb: { xs: 2, md: 3 },
-                      color: 'rgba(255, 255, 255, 0.65)',
-                      fontFamily: '"Poppins", sans-serif',
-                      minHeight: { xs: '40px', md: '60px' },
-                      fontSize: { xs: '0.85rem', md: '1rem' }
-                    }}>
-                      Equipped with forklift licenses and proper tools.
-                    </Typography>
-                    
-                    <Divider sx={{ my: { xs: 1.5, md: 3 }, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
-                    
-                    <Box sx={{ mb: 3, display: { xs: 'none', sm: 'block' } }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 1, md: 2 } }}>
-                        <Box 
-                          sx={{ 
-                            width: '8px', 
-                            height: '8px', 
-                            borderRadius: '50%', 
-                            backgroundColor: '#DE1F27', 
-                            mr: 1.5,
-                            flexShrink: 0
-                          }} 
-                        />
-                        <Typography variant="body2" sx={{ 
-                          color: 'white',
-                          fontFamily: '"Poppins", sans-serif',
-                          fontSize: { xs: '0.8rem', md: '1rem' }
-                        }}>
-                          Certified forklift operators
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 1, md: 2 } }}>
-                        <Box 
-                          sx={{ 
-                            width: '8px', 
-                            height: '8px', 
-                            borderRadius: '50%', 
-                            backgroundColor: '#DE1F27', 
-                            mr: 1.5,
-                            flexShrink: 0
-                          }} 
-                        />
-                        <Typography variant="body2" sx={{ 
-                          color: 'white',
-                          fontFamily: '"Poppins", sans-serif',
-                          fontSize: { xs: '0.8rem', md: '1rem' }
-                        }}>
-                          Proper equipment for all jobs
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', mb: { xs: 1, md: 2 } }}>
-                        <Box 
-                          sx={{ 
-                            width: '8px', 
-                            height: '8px', 
-                            borderRadius: '50%', 
-                            backgroundColor: '#DE1F27', 
-                            mr: 1.5,
-                            flexShrink: 0
-                          }} 
-                        />
-                        <Typography variant="body2" sx={{ 
-                          color: 'white',
-                          fontFamily: '"Poppins", sans-serif',
-                          fontSize: { xs: '0.8rem', md: '1rem' }
-                        }}>
-                          Versatile cargo handling
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', mb: { xs: 1, md: 2 } }}>
-                        <Box 
-                          sx={{ 
-                            width: '8px', 
-                            height: '8px', 
-                            borderRadius: '50%', 
-                            backgroundColor: '#DE1F27', 
-                            mr: 1.5,
-                            flexShrink: 0
-                          }} 
-                        />
-                        <Typography variant="body2" sx={{ 
-                          color: 'white',
-                          fontFamily: '"Poppins", sans-serif',
-                          fontSize: { xs: '0.8rem', md: '1rem' }
-                        }}>
-                          Self-sufficient delivery process
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-              
-              {/* Modern Fleet */}
-              <Grid 
-                item 
-                xs={6} 
-                md={4} 
-                sx={{ 
-                  ml: { xs: 'auto', sm: 0 },
-                  mr: { xs: 'auto', sm: 0 },
-                  maxWidth: { xs: 'calc(50% - 16px)', sm: 'none' }
-                }}
-              >
-                <Card
-                  sx={{
-                    background: CARD_BG_COLOR,
-                    height: "100%",
-                    borderRadius: "16px",
-                    p: { xs: 2, md: 3 },
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                    cursor: "pointer",
-                    transition: "transform 0.3s ease",
-                    "&:hover": {
-                      transform: "translateY(-8px)",
-                      "& .section-heading": {
-                        color: RED_COLOR
-                      }
-                    },
-                  }}
-                >
-                  <CardContent sx={{ p: { xs: 1, md: 2 } }}>
-                    <Typography 
-                      variant="h4"
-                      className="section-heading" 
-                      sx={{ 
-                        mb: { xs: 1, md: 2 },
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 700,
-                        color: 'white',
-                        transition: 'color 0.3s ease',
-                        fontSize: { xs: '1.25rem', md: '1.5rem' }
-                      }}
-                    >
-                      Modern Fleet
-                    </Typography>
-                    <Typography variant="body1" sx={{ 
-                      mb: { xs: 2, md: 3 },
-                      color: 'rgba(255, 255, 255, 0.65)',
-                      fontFamily: '"Poppins", sans-serif',
-                      minHeight: { xs: '40px', md: '60px' },
-                      fontSize: { xs: '0.85rem', md: '1rem' }
-                    }}>
-                      Current model trucks and Mercedes Benz vehicles.
-                    </Typography>
-                    
-                    <Divider sx={{ my: { xs: 1.5, md: 3 }, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
-                    
-                    <Box sx={{ mb: 3, display: { xs: 'none', sm: 'block' } }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 1, md: 2 } }}>
-                        <Box 
-                          sx={{ 
-                            width: '8px', 
-                            height: '8px', 
-                            borderRadius: '50%', 
-                            backgroundColor: '#DE1F27', 
-                            mr: 1.5,
-                            flexShrink: 0
-                          }} 
-                        />
-                        <Typography variant="body2" sx={{ 
-                          color: 'white',
-                          fontFamily: '"Poppins", sans-serif',
-                          fontSize: { xs: '0.8rem', md: '1rem' }
-                        }}>
-                          Latest model trucks
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 1, md: 2 } }}>
-                        <Box 
-                          sx={{ 
-                            width: '8px', 
-                            height: '8px', 
-                            borderRadius: '50%', 
-                            backgroundColor: '#DE1F27', 
-                            mr: 1.5,
-                            flexShrink: 0
-                          }} 
-                        />
-                        <Typography variant="body2" sx={{ 
-                          color: 'white',
-                          fontFamily: '"Poppins", sans-serif',
-                          fontSize: { xs: '0.8rem', md: '1rem' }
-                        }}>
-                          Mercedes Benz Sprinters
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', mb: { xs: 1, md: 2 } }}>
-                        <Box 
-                          sx={{ 
-                            width: '8px', 
-                            height: '8px', 
-                            borderRadius: '50%', 
-                            backgroundColor: '#DE1F27', 
-                            mr: 1.5,
-                            flexShrink: 0
-                          }} 
-                        />
-                        <Typography variant="body2" sx={{ 
-                          color: 'white',
-                          fontFamily: '"Poppins", sans-serif',
-                          fontSize: { xs: '0.8rem', md: '1rem' }
-                        }}>
-                          Mercedes Benz Vito vans
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', mb: { xs: 1, md: 2 } }}>
-                        <Box 
-                          sx={{ 
-                            width: '8px', 
-                            height: '8px', 
-                            borderRadius: '50%', 
-                            backgroundColor: '#DE1F27', 
-                            mr: 1.5,
-                            flexShrink: 0
-                          }} 
-                        />
-                        <Typography variant="body2" sx={{ 
-                          color: 'white',
-                          fontFamily: '"Poppins", sans-serif',
-                          fontSize: { xs: '0.8rem', md: '1rem' }
-                        }}>
-                          Regularly maintained
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
+              ))}
             </Grid>
           </Container>
         </Box>
 
-        {/* Decorative Line */}
-        <DecorativeLine />
-
-        <Box 
-          sx={{ 
-            py: { xs: 10, md: 14 },
-            position: 'relative',
-            background: 'linear-gradient(135deg, #000000 0%, #1a0005 100%)',
-            width: '100%',
-            overflow: 'hidden',
+        {/* Detailed Quote Form Modal */}
+        <QuoteFormModal
+          open={openQuoteForm}
+          onClose={handleCloseQuoteForm}
+          closeAfterTransition
+          slots={{
+            backdrop: Backdrop,
+          }}
+          slotProps={{
+            backdrop: {
+              timeout: 500,
+            },
           }}
         >
-          {/* Simple accent background */}
-          <Box 
-            sx={{
-              position: 'absolute',
-              top: '-10%',
-              right: '-5%',
-              width: '400px',
-              height: '400px',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(222, 31, 39, 0.2) 0%, rgba(0,0,0,0) 70%)',
-              filter: 'blur(60px)',
-              zIndex: 1,
-            }}
-          />
-
-          <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 2 }}>
-            <Grid 
-              container 
-              spacing={{ xs: 6, md: 8 }} 
-              alignItems="center" 
-              sx={{ position: 'relative' }}
-            >
-              {/* Left side with content */}
-              <Grid item xs={12} md={6} sx={{ order: { xs: 2, md: 1 } }}>
-                <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 10 : 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: isMobile ? 0.3 : 0.6 }}
-                >
-                  <Box sx={{ 
-                    p: { xs: 3, md: 5 },
-                    borderRadius: '16px',
-                    background: 'rgba(15, 15, 15, 0.6)',
-                    backdropFilter: 'blur(10px)',
-                    boxShadow: '0 15px 30px rgba(0, 0, 0, 0.2)',
-                    border: '1px solid rgba(255, 255, 255, 0.06)',
-                  }}>
-                    <Box>
-                      
-                      <Typography variant="h2" sx={{ 
-                        fontSize: { xs: '1.75rem', sm: '2rem', md: '3rem' },
-                        fontWeight: 800,
-                        mb: 2,
-                        color: '#FFFFFF',
-                        fontFamily: '"Oswald", sans-serif',
-                        lineHeight: 1.2,
-                        wordBreak: { xs: 'break-word', sm: 'normal' },
-                        letterSpacing: { xs: '-0.5px', md: 'normal' }
-                      }}>
-                        GET YOUR TRANSPORT QUOTE IN SECONDS
-                      </Typography>
-                      
-                      <Typography variant="body1" sx={{ 
-                        mb: { xs: 2, md: 4 },
-                        color: 'rgba(255, 255, 255, 0.65)',
-                        fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
-                        lineHeight: 1.5,
-                        fontFamily: '"Poppins", sans-serif',
-                      }}>
-                        Skip the waiting and paperwork. Our instant quote system delivers 
-                        quotes instantly so you can book your shipment and get moving.
-                      </Typography>
-                      
-                      {/* Features */}
-                      <Box sx={{ mb: { xs: 2, md: 4 } }}>
-                        
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                          <InventoryIcon sx={{ fontSize: { xs: 20, md: 25 }, color: RED_COLOR, mr: 2 }} />
-                          <Typography variant="body2" sx={{ color: 'white', fontFamily: '"Poppins", sans-serif', fontSize: { xs: '0.8rem', md: '0.9rem' } }}>
-                            All package sizes and weights accommodated
-                          </Typography>
-                        </Box>
-                        
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <EventAvailableIcon sx={{ fontSize: { xs: 20, md: 25 }, color: RED_COLOR, mr: 2 }} />
-                          <Typography variant="body2" sx={{ color: 'white', fontFamily: '"Poppins", sans-serif', fontSize: { xs: '0.8rem', md: '0.9rem' } }}>
-                            Same-day and scheduled deliveries available
-                          </Typography>
-                        </Box>
-                      </Box>
-                      
-                      <Button
-                        variant="contained" 
-                        onClick={() => handleNavigation('/instant-quote')}
-                        sx={{ 
-                          bgcolor: RED_COLOR, 
-                          color: 'white',
-                          textTransform: 'none',
-                          fontFamily: '"Poppins", sans-serif',
-                          fontWeight: 400,
-                          fontSize: '15px',
-                          borderRadius: '50px',
-                          padding: '8px 24px',
-                          minWidth: '130px',
-                          whiteSpace: 'nowrap',
-                          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)',
-                          position: 'relative',
-                          overflow: 'hidden',
-                          '&:hover': {
-                            bgcolor: '#c41922',
-                            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.25)'
-                          }
-                        }}
-                      >
-                        Get&nbsp;a&nbsp;Quote
-                      </Button>
-                    </Box>
-                  </Box>
-                </motion.div>
-              </Grid>
+          <Fade in={openQuoteForm}>
+            <QuoteModalContent>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h5" component="h2" sx={{ color: 'white', fontFamily: HEADING_FONT, fontWeight: 600 }}>
+                  Complete Your Quote Request
+                </Typography>
+                <IconButton onClick={handleCloseQuoteForm} sx={{ color: 'white' }}>
+                  <CloseIcon />
+                </IconButton>
+              </Box>
               
-              {/* Right side with image */}
-              <Grid item xs={12} md={6} sx={{ order: { xs: 1, md: 2 } }}>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <Box 
-                    sx={{ 
-                      position: 'relative',
-                      height: { xs: '300px', md: '500px' },
-                      borderRadius: '12px',
-                      overflow: 'hidden',
-                      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)',
-                    }}
-                  >
-                    <Box 
-                      component="img"
-                      loading="lazy"
-                      src="/PHOTO-2025-03-22-21-36-55.jpg"
-                      alt="Get Instant Quote"
+              <Box component="form" onSubmit={handleQuoteSubmit} sx={{ mt: 2 }}>
+                <Grid container spacing={3}>
+                  {/* Personal Information */}
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      required
+                      fullWidth
+                      label="First Name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      variant="filled"
+                sx={{ 
+                        bgcolor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '8px',
+                        '& .MuiFilledInput-root': {
+                          borderRadius: '8px',
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: 'rgba(255, 255, 255, 0.7)',
+                        },
+                        '& .MuiFilledInput-input': {
+                          color: 'white',
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      required
+                      fullWidth
+                      label="Last Name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      variant="filled"
                       sx={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        transition: 'transform 0.4s ease-in-out',
+                        bgcolor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '8px',
+                        '& .MuiFilledInput-root': {
+                          borderRadius: '8px',
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: 'rgba(255, 255, 255, 0.7)',
+                        },
+                        '& .MuiFilledInput-input': {
+                          color: 'white',
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      required
+                      fullWidth
+                      label="Email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      variant="filled"
+                      sx={{
+                        bgcolor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '8px',
+                        '& .MuiFilledInput-root': {
+                          borderRadius: '8px',
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: 'rgba(255, 255, 255, 0.7)',
+                        },
+                        '& .MuiFilledInput-input': {
+                          color: 'white',
+                        },
+                      }}
+                    />
+                  </Grid>
+                  
+                  {/* Shipment Details */}
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={3}
+                      label="Description of Goods"
+                      value={goodsDescription}
+                      onChange={(e) => setGoodsDescription(e.target.value)}
+                      variant="filled"
+                      placeholder="Please describe what you need transported"
+                      sx={{
+                        bgcolor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '8px',
+                        '& .MuiFilledInput-root': {
+                          borderRadius: '8px',
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: 'rgba(255, 255, 255, 0.7)',
+                        },
+                        '& .MuiFilledInput-input': {
+                          color: 'white',
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl variant="filled" fullWidth sx={{
+                      bgcolor: 'rgba(255, 255, 255, 0.05)',
+                      borderRadius: '8px',
+                      '& .MuiFilledInput-root': {
+                        borderRadius: '8px',
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                      },
+                      '& .MuiFilledInput-input': {
+                        color: 'white',
+                      },
+                      '& .MuiSelect-icon': {
+                        color: 'white',
+                      },
+                    }}>
+                      <InputLabel>Service</InputLabel>
+                      <Select
+                        value={service}
+                        onChange={(e) => setService(e.target.value as string)}
+                      >
+                        <MenuItem value="parcel">Parcel Delivery</MenuItem>
+                        <MenuItem value="fragile">Fragile Freight</MenuItem>
+                        <MenuItem value="chauffeur">Chauffeur Services</MenuItem>
+                        <MenuItem value="doorToDoor">Door to Door Service</MenuItem>
+                        <MenuItem value="sameDay">Same Day Delivery</MenuItem>
+                        <MenuItem value="interstate">Interstate Delivery</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  
+                  {/* Dimensions */}
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle1" sx={{ color: 'white', mb: 1, fontFamily: BODY_FONT }}>
+                      Dimensions (cm)
+              </Typography>
+                    <Grid container spacing={1}>
+                      <Grid item xs={4}>
+                        <TextField
+                          fullWidth
+                          label="Length"
+                          value={dimensions.length}
+                          onChange={(e) => setDimensions({...dimensions, length: e.target.value})}
+                          variant="filled"
+                          InputProps={{
+                            endAdornment: <InputAdornment position="end" sx={{ color: 'white' }}>cm</InputAdornment>,
+                          }}
+                          sx={{
+                            bgcolor: 'rgba(255, 255, 255, 0.05)',
+                            borderRadius: '8px',
+                            '& .MuiFilledInput-root': { borderRadius: '8px' },
+                            '& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.7)' },
+                            '& .MuiFilledInput-input': { color: 'white' },
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <TextField
+                          fullWidth
+                          label="Width"
+                          value={dimensions.width}
+                          onChange={(e) => setDimensions({...dimensions, width: e.target.value})}
+                          variant="filled"
+                          InputProps={{
+                            endAdornment: <InputAdornment position="end" sx={{ color: 'white' }}>cm</InputAdornment>,
+                          }}
+                          sx={{
+                            bgcolor: 'rgba(255, 255, 255, 0.05)',
+                            borderRadius: '8px',
+                            '& .MuiFilledInput-root': { borderRadius: '8px' },
+                            '& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.7)' },
+                            '& .MuiFilledInput-input': { color: 'white' },
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <TextField
+                          fullWidth
+                          label="Height"
+                          value={dimensions.height}
+                          onChange={(e) => setDimensions({...dimensions, height: e.target.value})}
+                          variant="filled"
+                          InputProps={{
+                            endAdornment: <InputAdornment position="end" sx={{ color: 'white' }}>cm</InputAdornment>,
+                          }}
+                          sx={{
+                            bgcolor: 'rgba(255, 255, 255, 0.05)',
+                            borderRadius: '8px',
+                            '& .MuiFilledInput-root': { borderRadius: '8px' },
+                            '& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.7)' },
+                            '& .MuiFilledInput-input': { color: 'white' },
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                  
+                  {/* Access Options */}
+                  <Grid item xs={12} sm={6}>
+                    <FormControl component="fieldset" sx={{ width: '100%' }}>
+                      <FormLabel component="legend" sx={{ color: 'white', fontFamily: BODY_FONT }}>Pickup Access</FormLabel>
+                      <RadioGroup
+                        row
+                        value={pickupAccess}
+                        onChange={(e) => setPickupAccess(e.target.value)}
+                      >
+                        <FormControlLabel 
+                          value="ground" 
+                          control={<Radio sx={{ color: 'white', '&.Mui-checked': { color: '#6B46C1' } }} />} 
+                          label="Ground Floor" 
+                          sx={{ color: 'white' }}
+                        />
+                        <FormControlLabel 
+                          value="stairs" 
+                          control={<Radio sx={{ color: 'white', '&.Mui-checked': { color: '#6B46C1' } }} />} 
+                          label="Stairs" 
+                          sx={{ color: 'white' }}
+                        />
+                      </RadioGroup>
+                    </FormControl>
+                  </Grid>
+                  
+                  <Grid item xs={12} sm={6}>
+                    <FormControl component="fieldset" sx={{ width: '100%' }}>
+                      <FormLabel component="legend" sx={{ color: 'white', fontFamily: BODY_FONT }}>Delivery Access</FormLabel>
+                      <RadioGroup
+                        row
+                        value={deliveryAccess}
+                        onChange={(e) => setDeliveryAccess(e.target.value)}
+                      >
+                        <FormControlLabel 
+                          value="ground" 
+                          control={<Radio sx={{ color: 'white', '&.Mui-checked': { color: '#6B46C1' } }} />} 
+                          label="Ground Floor" 
+                          sx={{ color: 'white' }}
+                        />
+                        <FormControlLabel 
+                          value="stairs" 
+                          control={<Radio sx={{ color: 'white', '&.Mui-checked': { color: '#6B46C1' } }} />} 
+                          label="Stairs" 
+                          sx={{ color: 'white' }}
+                        />
+                      </RadioGroup>
+                    </FormControl>
+                  </Grid>
+                  
+                  {/* Fragile */}
+                  <Grid item xs={12} sm={6}>
+                    <FormControl component="fieldset" sx={{ width: '100%' }}>
+                      <FormLabel component="legend" sx={{ color: 'white', fontFamily: BODY_FONT }}>Fragile Items?</FormLabel>
+                      <RadioGroup
+                        row
+                        value={fragile}
+                        onChange={(e) => setFragile(e.target.value)}
+                      >
+                        <FormControlLabel 
+                          value="yes" 
+                          control={<Radio sx={{ color: 'white', '&.Mui-checked': { color: '#6B46C1' } }} />} 
+                          label="Yes" 
+                          sx={{ color: 'white' }}
+                        />
+                        <FormControlLabel 
+                          value="no" 
+                          control={<Radio sx={{ color: 'white', '&.Mui-checked': { color: '#6B46C1' } }} />} 
+                          label="No" 
+                          sx={{ color: 'white' }}
+                        />
+                      </RadioGroup>
+                    </FormControl>
+                  </Grid>
+                  
+                  {/* Other Info */}
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={3}
+                      label="Other Information"
+                      value={otherInfo}
+                      onChange={(e) => setOtherInfo(e.target.value)}
+                      variant="filled"
+                      placeholder="Any additional details or special requirements"
+                      sx={{
+                        bgcolor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '8px',
+                        '& .MuiFilledInput-root': {
+                          borderRadius: '8px',
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: 'rgba(255, 255, 255, 0.7)',
+                        },
+                        '& .MuiFilledInput-input': {
+                          color: 'white',
+                        },
+                      }}
+                    />
+                  </Grid>
+                  
+                  {/* Submit Button */}
+                  <Grid item xs={12}>
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      fullWidth
+                      sx={{
+                        mt: 2,
+                        py: 1.5,
+                        bgcolor: '#6B46C1',
+                        color: 'white',
+                        textTransform: 'none',
+                        fontFamily: BODY_FONT,
+                        fontWeight: 600,
+                        fontSize: '1.1rem',
+                        borderRadius: '8px',
                         '&:hover': {
-                          transform: 'scale(1.05)'
+                          bgcolor: '#553C9A',
+                        },
+                      }}
+                    >
+                      Submit Quote Request
+                    </Button>
+                  </Grid>
+                </Grid>
+        </Box>
+            </QuoteModalContent>
+          </Fade>
+        </QuoteFormModal>
+
+        
+
+          {/* Decorative Line */}
+          <DecorativeLine />
+
+          <LogoContainer>
+            <Container maxWidth="lg" sx={{ textAlign: 'center' }}>
+              <Typography variant="h6" sx={{ 
+                color: 'white',
+                mb: { xs: 2, md: 4 }, 
+                letterSpacing: 1, 
+                fontWeight: 800,
+                fontFamily: HEADING_FONT,
+                fontSize: { xs: '0.9rem', sm: '1.1rem', md: '1.25rem' }
+              }}>
+                TRUSTED BY
+              </Typography>
+              
+              
+              <Box className="logo-slide-container">
+                <Box className="logo-slide">
+                  {[
+                    { src: "/Sydney+Visitor+Centre_Small.png", alt: "Sydney Visitor Centre", id: "svc-1" },
+                    { src: "/motex-transport-hunter-valley-wedding-planner.png", alt: "Hunter Valley Wedding Planner", id: "hvwp-1" },
+                    { src: "/motex-transport-cwci-logo.png", alt: "CWCI", id: "cwci-1" },
+                    { src: "/Sydney+Visitor+Centre_Small.png", alt: "Sydney Visitor Centre", id: "svc-2" },
+                    { src: "/motex-transport-hunter-valley-wedding-planner.png", alt: "Hunter Valley Wedding Planner", id: "hvwp-2" },
+                    { src: "/motex-transport-cwci-logo.png", alt: "CWCI", id: "cwci-2" }
+                  ].map((logo) => (
+                    <Box 
+                      key={logo.id}
+                      component="img" 
+                      src={logo.src} 
+                      alt={logo.alt}
+                      sx={{
+                        height: { xs: '40px', sm: '50px', md: '60px' },
+                        mx: { xs: 3, sm: 4, md: 6 },
+                        opacity: 1,
+                        transition: 'transform 0.3s',
+                        filter: 'brightness(1)',
+                        '&:hover': {
+                          transform: 'scale(1.05)',
                         }
                       }}
                     />
-                    
-                    <Box sx={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)',
-                      height: '40%',
-                      zIndex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'flex-end',
-                      p: 3
-                    }}>
-                      
-                    </Box>
-                  </Box>
-                </motion.div>
-              </Grid>
-            </Grid>
-          </Container>
-        </Box>
-
-        {/* Decorative Line */}
-        <DecorativeLine />
-
-        {/* Testimonials Section */}
-        <TestimonialSection>
-          <Container maxWidth="lg">
-            <Typography variant="h2" align="center" sx={{ 
-              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '3.5rem' },
-              fontWeight: 700,
-              mb: { xs: 3, md: 6 },
-              color: 'white',
-              fontFamily: '"Oswald", sans-serif',
-            }}>
-              WHAT OUR CLIENTS SAY ABOUT US
-            </Typography>
-            
-            {/* Desktop view - static grid */}
-            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-              <Grid container spacing={3}>
-                {/* Hunter Valley Wedding Planner Testimonial */}
-                <Grid item md={6}>
-                  <Box sx={{ p: 2 }}>
-
-                    <TestimonialCard>
-                      <Box
-                        component="img"
-                        src="/motex-transport-hunter-valley-wedding-planner.png"
-                        alt="Hunter Valley Wedding Planner"
-                        sx={{
-                          height: { xs: '40px', sm: '60px', md: '80px' },
-                          mb: { xs: 2, md: 4 },
-                          display: 'block',
-                          filter: 'brightness(1.2)',
-                        }}
-                      />
-                      
-                      <Typography variant="body1" sx={{ 
-                        mb: 2, 
-                        lineHeight: 1.6,
-                        fontFamily: '"Poppins", sans-serif',
-                        fontStyle: 'italic',
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontSize: { xs: '0.7rem', sm: '0.8rem', md: '1rem' },
-                        height: { xs: '150px', sm: '200px', md: 'auto' },
-                        overflow: { xs: 'auto', md: 'visible' },
-                        display: '-webkit-box',
-                        WebkitLineClamp: { xs: 10, sm: 'unset' },
-                        WebkitBoxOrient: 'vertical'
-                      }}>
-                        "The service we received from Motex Transport was extremely professional, efficient and cost effective. Roy was an absolute life saver for us, during an extremely busy period for the business. We had multiple delivery drops - one being on a Saturday - and nothing was an issue. We liked that we could communicate directly with the driver, which was extremely reassuring for us when goods needed to be delivered within allocated time slots. He also continued to communicate with us in terms of delivery ETA's and updates. This really saved us sooooo much stress and pressure. We hope to continue to use Motex moving forward. Well done and thank you for your professionalism and wonderful service."
-                      </Typography>
-                      
-                      <Typography variant="subtitle1" sx={{ 
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 600,
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontSize: { xs: '0.75rem', sm: '0.85rem', md: '1rem' }
-                      }}>
-                        - Natalie, <Box component="a" href="https://huntervalleyweddingplanner.com.au/" target="_blank" rel="noopener" sx={{ color: '#c6b47a', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Hunter Valley Wedding Planner</Box>
-                      </Typography>
-                    </TestimonialCard>
-                  </Box>
-                </Grid>
-                
-                {/* CWCI Australia Testimonial */}
-                <Grid item md={6}>
-                  <Box sx={{ p: 2 }}>
-
-                    <TestimonialCard>
-                      <Box
-                        component="img"
-                        src="/motex-transport-cwci-logo.png"
-                        alt="CWCI Australia"
-                        sx={{
-                          height: { xs: '40px', sm: '60px', md: '80px' },
-                          mb: { xs: 2, md: 4 },
-                          display: 'block',
-                          filter: 'brightness(1.2)',
-                        }}
-                      />
-                      
-                      <Typography variant="body1" sx={{ 
-                        mb: 2, 
-                        lineHeight: 1.6,
-                        fontFamily: '"Poppins", sans-serif',
-                        fontStyle: 'italic',
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontSize: { xs: '0.75rem', sm: '0.85rem', md: '1rem' },
-                        height: { xs: '200px', sm: '250px', md: 'auto' },
-                        overflow: { xs: 'hidden', md: 'visible' }
-                      }}>
-                        "Our premises are a challenge for deliveries with stairs and uneven surfaces, however Roy (Motex) has for many years delivered boxes to us with efficiency, care and cheerfulness. This makes a huge difference as we are a small staff yet often have deliveries varying from 5 - 30 boxes at different times of the year. This enables us to function well and always be on top of stock and supply. I would highly recommend Motex Transport to any size or type of business - you won't be disappointed!"
-                      </Typography>
-                      
-                      <Typography variant="subtitle1" sx={{ 
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 600,
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontSize: { xs: '0.75rem', sm: '0.85rem', md: '1rem' }
-                      }}>
-                        - Christine, <Box component="a" href="https://cwciaus.org.au/" target="_blank" rel="noopener" sx={{ color: '#9b3dba', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>CWCI Australia</Box>
-                      </Typography>
-                    </TestimonialCard>
-                  </Box>
-                </Grid>
-                
-                {/* Sydney Visitor Centre Testimonial */}
-                <Grid item md={12}>
-                  <Box sx={{ p: 2, maxWidth: '800px', mx: 'auto' }}>
-
-                    <TestimonialCard sx={{ textAlign: 'center' }}>
-                      <Box
-                        component="img"
-                        src="/Sydney+Visitor+Centre_Small.png"
-                        alt="Sydney Visitor Centre"
-                        sx={{
-                          height: { xs: '40px', sm: '50px', md: '60px' },
-                          mb: { xs: 2, md: 4 },
-                          display: 'block',
-                          mx: 'auto',
-                          filter: 'brightness(1.2)',
-                        }}
-                      />
-                      
-                      <Typography variant="body1" sx={{ 
-                        mb: 2, 
-                        lineHeight: 1.6,
-                        fontFamily: '"Poppins", sans-serif',
-                        fontStyle: 'italic',
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontSize: { xs: '0.75rem', sm: '0.85rem', md: '1rem' },
-                        maxWidth: '800px',
-                        mx: 'auto'
-                      }}>
-                        "The Motex Team consistently go that extra mile for the customer. In order to free up the time of our staff on the ground, the Motex team go above and beyond the typical expectations to ensure we as the customer are always put first whilst carrying out the job to an exemplary level. I would highly recommend and endorse Motex as being an excellent company, and we will most certainly continue to use their services."
-                      </Typography>
-                      
-                      <Typography variant="subtitle1" sx={{ 
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 600,
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontSize: { xs: '0.75rem', sm: '0.85rem', md: '1rem' }
-                      }}>
-                        - Adam, <Box component="a" href="https://visitorcentre.com.au/" target="_blank" rel="noopener" sx={{ color: '#0066b3', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Sydney Visitor Centre</Box>
-                      </Typography>
-                    </TestimonialCard>
-                  </Box>
-                </Grid>
-              </Grid>
-            </Box>
-            
-            {/* Mobile view - carousel */}
-            <Box sx={{ display: { xs: 'block', md: 'none' } }}>
-              <CarouselContainer>
-                <CarouselTrack 
-                  ref={testimonialCarouselRef}
-                  sx={{ 
-                    transform: `translateX(-${activeTestimonialSlide * 100}%)`,
-                  }}
-                >
-                  {/* First Slide - Hunter Valley Wedding Planner */}
-                  <Box 
-                    sx={{ 
-                      display: 'flex',
-                      width: '100%',
-                      flexShrink: 0,
-                      justifyContent: 'center',
-                      p: { xs: 2 }
-                    }}
-                  >
-                    <TestimonialCard sx={{ width: '100%' }}>
-                      <Box
-                        component="img"
-                        src="/motex-transport-hunter-valley-wedding-planner.png"
-                        alt="Hunter Valley Wedding Planner"
-                        sx={{
-                          height: { xs: '40px', sm: '60px' },
-                          mb: { xs: 2 },
-                          display: 'block',
-                          filter: 'brightness(1.2)',
-                        }}
-                      />
-                      
-                      <Typography variant="body1" sx={{ 
-                        mb: 2, 
-                        lineHeight: 1.6,
-                        fontFamily: '"Poppins", sans-serif',
-                        fontStyle: 'italic',
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontSize: { xs: '0.7rem', sm: '0.8rem' },
-                        maxHeight: '180px',
-                        overflow: 'auto'
-                      }}>
-                        "The service we received from Motex Transport was extremely professional, efficient and cost effective. Roy was an absolute life saver for us, during an extremely busy period for the business. We had multiple delivery drops - one being on a Saturday - and nothing was an issue. We liked that we could communicate directly with the driver, which was extremely reassuring for us when goods needed to be delivered within allocated time slots. He also continued to communicate with us in terms of delivery ETA's and updates. This really saved us sooooo much stress and pressure. We hope to continue to use Motex moving forward. Well done and thank you for your professionalism and wonderful service."
-                      </Typography>
-                      
-                      <Typography variant="subtitle1" sx={{ 
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 600,
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontSize: { xs: '0.75rem', sm: '0.85rem' }
-                      }}>
-                        - Natalie, <Box component="a" href="https://huntervalleyweddingplanner.com.au/" target="_blank" rel="noopener" sx={{ color: '#c6b47a', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Hunter Valley Wedding Planner</Box>
-                      </Typography>
-                    </TestimonialCard>
-                  </Box>
-                  
-                  {/* Second Slide - CWCI Australia */}
-                  <Box 
-                    sx={{ 
-                      display: 'flex',
-                      width: '100%',
-                      flexShrink: 0,
-                      justifyContent: 'center',
-                      p: { xs: 2 }
-                    }}
-                  >
-                    <TestimonialCard sx={{ width: '100%' }}>
-                      <Box
-                        component="img"
-                        src="/motex-transport-cwci-logo.png"
-                        alt="CWCI Australia"
-                        sx={{
-                          height: { xs: '40px', sm: '60px' },
-                          mb: { xs: 2 },
-                          display: 'block',
-                          filter: 'brightness(1.2)',
-                        }}
-                      />
-                      
-                      <Typography variant="body1" sx={{ 
-                        mb: 2, 
-                        lineHeight: 1.6,
-                        fontFamily: '"Poppins", sans-serif',
-                        fontStyle: 'italic',
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                        maxHeight: '180px',
-                        overflow: 'auto'
-                      }}>
-                        "Our premises are a challenge for deliveries with stairs and uneven surfaces, however Roy (Motex) has for many years delivered boxes to us with efficiency, care and cheerfulness. This makes a huge difference as we are a small staff yet often have deliveries varying from 5 - 30 boxes at different times of the year. This enables us to function well and always be on top of stock and supply. I would highly recommend Motex Transport to any size or type of business - you won't be disappointed!"
-                      </Typography>
-                      
-                      <Typography variant="subtitle1" sx={{ 
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 600,
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontSize: { xs: '0.75rem', sm: '0.85rem' }
-                      }}>
-                        - Christine, <Box component="a" href="https://cwciaus.org.au/" target="_blank" rel="noopener" sx={{ color: '#9b3dba', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>CWCI Australia</Box>
-                      </Typography>
-                    </TestimonialCard>
-                  </Box>
-                  
-                  {/* Third Slide - Sydney Visitor Centre */}
-                  <Box 
-                    sx={{ 
-                      display: 'flex',
-                      width: '100%',
-                      flexShrink: 0,
-                      justifyContent: 'center',
-                      p: { xs: 2 }
-                    }}
-                  >
-                    <TestimonialCard sx={{ width: '100%', textAlign: 'center' }}>
-                      <Box
-                        component="img"
-                        src="/Sydney+Visitor+Centre_Small.png"
-                        alt="Sydney Visitor Centre"
-                        sx={{
-                          height: { xs: '40px', sm: '50px' },
-                          mb: { xs: 2 },
-                          display: 'block',
-                          mx: 'auto',
-                          filter: 'brightness(1.2)',
-                        }}
-                      />
-                      
-                      <Typography variant="body1" sx={{ 
-                        mb: 2, 
-                        lineHeight: 1.6,
-                        fontFamily: '"Poppins", sans-serif',
-                        fontStyle: 'italic',
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                        maxHeight: '180px',
-                        overflow: 'auto'
-                      }}>
-                        "The Motex Team consistently go that extra mile for the customer. In order to free up the time of our staff on the ground, the Motex team go above and beyond the typical expectations to ensure we as the customer are always put first whilst carrying out the job to an exemplary level. I would highly recommend and endorse Motex as being an excellent company, and we will most certainly continue to use their services."
-                      </Typography>
-                      
-                      <Typography variant="subtitle1" sx={{ 
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 600,
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontSize: { xs: '0.75rem', sm: '0.85rem' }
-                      }}>
-                        - Adam, <Box component="a" href="https://visitorcentre.com.au/" target="_blank" rel="noopener" sx={{ color: '#0066b3', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Sydney Visitor Centre</Box>
-                      </Typography>
-                    </TestimonialCard>
-                  </Box>
-                </CarouselTrack>
-              </CarouselContainer>
-              
-              {/* Dots indicator for testimonial slides - mobile only */}
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
-                {[
-                  { id: 'testimonial-dot-1', value: 0 }, 
-                  { id: 'testimonial-dot-2', value: 1 },
-                  { id: 'testimonial-dot-3', value: 2 }
-                ].map((dot) => (
-                  <Box
-                    key={dot.id}
-                    sx={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: '50%',
-                      mx: 0.5,
-                      cursor: 'pointer',
-                      backgroundColor: dot.value === activeTestimonialSlide ? RED_COLOR : 'rgba(255,255,255,0.3)',
-                      transition: 'background-color 0.3s',
-                    }}
-                    onClick={() => setActiveTestimonialSlide(dot.value)}
-                  />
-                ))}
+                  ))}
+                </Box>
               </Box>
-            </Box>
-          </Container>
-        </TestimonialSection>
+            </Container>
+          </LogoContainer>
 
-        {/* Decorative Line */}
-        <DecorativeLine />
+          {/* Decorative Line */}
+          <DecorativeLine />
 
-        <Box sx={{ bgcolor: RED_COLOR, py: 6 }}>
-          <Container maxWidth="lg">
-            <Grid container spacing={4}>
-              <Grid item xs={12} md={5}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <Box 
-                    component="img" 
-                    src="/MOTEX+Logo.png" 
-                    alt="MOTEX Logo" 
+          {/* Testimonials Section */}
+          <TestimonialSection>
+            <Container maxWidth="lg">
+              <Typography variant="h2" align="center" sx={{ 
+                fontSize: { xs: '1.5rem', sm: '1.75rem', md: '3.5rem' },
+                fontWeight: 700,
+                mb: { xs: 3, md: 6 },
+                color: 'white',
+                fontFamily: HEADING_FONT,
+              }}>
+                WHAT OUR CLIENTS SAY ABOUT US
+              </Typography>
+              
+              {/* Desktop view - static grid */}
+              <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                <Grid container spacing={3}>
+                  {/* Hunter Valley Wedding Planner Testimonial */}
+                  <Grid item md={6}>
+                    <Box sx={{ p: 2 }}>
+
+                      <TestimonialCard>
+                        <Box
+                          component="img"
+                          src="/motex-transport-hunter-valley-wedding-planner.png"
+                          alt="Hunter Valley Wedding Planner"
+                          sx={{
+                            height: { xs: '40px', sm: '60px', md: '80px' },
+                            mb: { xs: 2, md: 4 },
+                            display: 'block',
+                            filter: 'brightness(1.2)',
+                          }}
+                        />
+                        
+                        <Typography variant="body1" sx={{ 
+                          mb: 2, 
+                          lineHeight: 1.6,
+                        fontFamily: BODY_FONT,
+                          fontStyle: 'italic',
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          fontSize: { xs: '0.7rem', sm: '0.8rem', md: '1rem' },
+                          height: { xs: '150px', sm: '200px', md: 'auto' },
+                          overflow: { xs: 'auto', md: 'visible' },
+                          display: '-webkit-box',
+                          WebkitLineClamp: { xs: 10, sm: 'unset' },
+                          WebkitBoxOrient: 'vertical'
+                        }}>
+                          "The service we received from Motex Transport was extremely professional, efficient and cost effective. Roy was an absolute life saver for us, during an extremely busy period for the business. We had multiple delivery drops - one being on a Saturday - and nothing was an issue. We liked that we could communicate directly with the driver, which was extremely reassuring for us when goods needed to be delivered within allocated time slots. He also continued to communicate with us in terms of delivery ETA's and updates. This really saved us sooooo much stress and pressure. We hope to continue to use Motex moving forward. Well done and thank you for your professionalism and wonderful service."
+                        </Typography>
+                        
+                        <Typography variant="subtitle1" sx={{ 
+                        fontFamily: BODY_FONT,
+                          fontWeight: 600,
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          fontSize: { xs: '0.75rem', sm: '0.85rem', md: '1rem' }
+                        }}>
+                          - Natalie, <Box component="a" href="https://huntervalleyweddingplanner.com.au/" target="_blank" rel="noopener" sx={{ color: '#c6b47a', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Hunter Valley Wedding Planner</Box>
+                        </Typography>
+                      </TestimonialCard>
+                    </Box>
+                  </Grid>
+                  
+                  {/* CWCI Australia Testimonial */}
+                  <Grid item md={6}>
+                    <Box sx={{ p: 2 }}>
+
+                      <TestimonialCard>
+                        <Box
+                          component="img"
+                          src="/motex-transport-cwci-logo.png"
+                          alt="CWCI Australia"
+                          sx={{
+                            height: { xs: '40px', sm: '60px', md: '80px' },
+                            mb: { xs: 2, md: 4 },
+                            display: 'block',
+                            filter: 'brightness(1.2)',
+                          }}
+                        />
+                        
+                        <Typography variant="body1" sx={{ 
+                          mb: 2, 
+                          lineHeight: 1.6,
+                        fontFamily: BODY_FONT,
+                          fontStyle: 'italic',
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          fontSize: { xs: '0.75rem', sm: '0.85rem', md: '1rem' },
+                          height: { xs: '200px', sm: '250px', md: 'auto' },
+                          overflow: { xs: 'hidden', md: 'visible' }
+                        }}>
+                          "Our premises are a challenge for deliveries with stairs and uneven surfaces, however Roy (Motex) has for many years delivered boxes to us with efficiency, care and cheerfulness. This makes a huge difference as we are a small staff yet often have deliveries varying from 5 - 30 boxes at different times of the year. This enables us to function well and always be on top of stock and supply. I would highly recommend Motex Transport to any size or type of business - you won't be disappointed!"
+                        </Typography>
+                        
+                        <Typography variant="subtitle1" sx={{ 
+                        fontFamily: BODY_FONT,
+                          fontWeight: 600,
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          fontSize: { xs: '0.75rem', sm: '0.85rem', md: '1rem' }
+                        }}>
+                          - Christine, <Box component="a" href="https://cwciaus.org.au/" target="_blank" rel="noopener" sx={{ color: '#9b3dba', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>CWCI Australia</Box>
+                        </Typography>
+                      </TestimonialCard>
+                    </Box>
+                  </Grid>
+                  
+                  {/* Sydney Visitor Centre Testimonial */}
+                  <Grid item md={12}>
+                    <Box sx={{ p: 2, maxWidth: '800px', mx: 'auto' }}>
+
+                      <TestimonialCard sx={{ textAlign: 'center' }}>
+                        <Box
+                          component="img"
+                          src="/Sydney+Visitor+Centre_Small.png"
+                          alt="Sydney Visitor Centre"
+                          sx={{
+                            height: { xs: '40px', sm: '50px', md: '60px' },
+                            mb: { xs: 2, md: 4 },
+                            display: 'block',
+                            mx: 'auto',
+                            filter: 'brightness(1.2)',
+                          }}
+                        />
+                        
+                        <Typography variant="body1" sx={{ 
+                          mb: 2, 
+                          lineHeight: 1.6,
+                        fontFamily: BODY_FONT,
+                          fontStyle: 'italic',
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          fontSize: { xs: '0.75rem', sm: '0.85rem', md: '1rem' },
+                          maxWidth: '800px',
+                          mx: 'auto'
+                        }}>
+                          "The Motex Team consistently go that extra mile for the customer. In order to free up the time of our staff on the ground, the Motex team go above and beyond the typical expectations to ensure we as the customer are always put first whilst carrying out the job to an exemplary level. I would highly recommend and endorse Motex as being an excellent company, and we will most certainly continue to use their services."
+                        </Typography>
+                        
+                        <Typography variant="subtitle1" sx={{ 
+                        fontFamily: BODY_FONT,
+                          fontWeight: 600,
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          fontSize: { xs: '0.75rem', sm: '0.85rem', md: '1rem' }
+                        }}>
+                          - Adam, <Box component="a" href="https://visitorcentre.com.au/" target="_blank" rel="noopener" sx={{ color: '#0066b3', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Sydney Visitor Centre</Box>
+                        </Typography>
+                      </TestimonialCard>
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Box>
+              
+              {/* Mobile view - carousel */}
+              <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+                <CarouselContainer>
+                  <CarouselTrack 
+                    ref={testimonialCarouselRef}
                     sx={{ 
-                      height: 40, 
-                      filter: 'brightness(0) invert(1)'
-                    }} 
-                  />
-                </Box>
-                <Typography variant="body2" sx={{ color: 'white', opacity: 0.9, mb: 3, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                  MOTEX Transport is a leading provider of logistics and transportation services across Australia, offering reliable and efficient solutions for businesses of all sizes.
-                </Typography>
-                
-                {/* Social Media Icons */}
-                <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                  <IconButton 
-                    sx={{ 
-                      color: 'white', 
-                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.3)' }
+                      transform: `translateX(-${activeTestimonialSlide * 100}%)`,
                     }}
-                    component="a"
-                    href="https://www.instagram.com/motextransport/"
                   >
-                    <InstagramIcon />
-                  </IconButton>
-                </Stack>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={3}>
-                <Typography variant="h6" sx={{ color: 'white', mb: 2, fontFamily: '"Poppins", sans-serif', fontWeight: 'bold', fontSize: '20px' }}>
-                  Quick Links
-                </Typography>
-                <Stack spacing={1}>
-                  <Link href="/" color="inherit" underline="hover" sx={{ color: 'white', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Home
-                  </Link>
-                  <Link href="/about-us" color="inherit" underline="hover" sx={{ color: 'white', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    About Us
-                  </Link>
-                  <Link href="#" color="inherit" underline="hover" sx={{ color: 'white', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Services
-                  </Link>
-                  <Link href="/instant-quote" color="inherit" underline="hover" sx={{ color: 'white', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Instant Quote
-                  </Link>
-                  <Link href="/gallery" color="inherit" underline="hover" sx={{ color: 'white', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Gallery
-                  </Link>
-                  <Link href="#" color="inherit" underline="hover" sx={{ color: 'white', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Contact
-                  </Link>
-                </Stack>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4}>
-                <Typography variant="h6" sx={{ color: 'white', mb: 2, fontFamily: '"Poppins", sans-serif', fontWeight: 'bold', fontSize: '20px' }}>
-                  Contact Information
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <LocationIcon sx={{ color: 'white', mr: 1.5 }} />
-                  <Typography variant="body2" sx={{ color: 'white', opacity: 0.9, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                  Rozelle NSW 2039, Australia
-                  </Typography>
+                    {/* First Slide - Hunter Valley Wedding Planner */}
+                    <Box 
+                      sx={{ 
+                        display: 'flex',
+                        width: '100%',
+                        flexShrink: 0,
+                        justifyContent: 'center',
+                        p: { xs: 2 }
+                      }}
+                    >
+                      <TestimonialCard sx={{ width: '100%' }}>
+                        <Box
+                          component="img"
+                          src="/motex-transport-hunter-valley-wedding-planner.png"
+                          alt="Hunter Valley Wedding Planner"
+                          sx={{
+                            height: { xs: '40px', sm: '60px' },
+                            mb: { xs: 2 },
+                            display: 'block',
+                            filter: 'brightness(1.2)',
+                          }}
+                        />
+                        
+                        <Typography variant="body1" sx={{ 
+                          mb: 2, 
+                          lineHeight: 1.6,
+                        fontFamily: BODY_FONT,
+                          fontStyle: 'italic',
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                          maxHeight: '180px',
+                          overflow: 'auto'
+                        }}>
+                          "The service we received from Motex Transport was extremely professional, efficient and cost effective. Roy was an absolute life saver for us, during an extremely busy period for the business. We had multiple delivery drops - one being on a Saturday - and nothing was an issue. We liked that we could communicate directly with the driver, which was extremely reassuring for us when goods needed to be delivered within allocated time slots. He also continued to communicate with us in terms of delivery ETA's and updates. This really saved us sooooo much stress and pressure. We hope to continue to use Motex moving forward. Well done and thank you for your professionalism and wonderful service."
+                        </Typography>
+                        
+                        <Typography variant="subtitle1" sx={{ 
+                        fontFamily: BODY_FONT,
+                          fontWeight: 600,
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          fontSize: { xs: '0.75rem', sm: '0.85rem' }
+                        }}>
+                          - Natalie, <Box component="a" href="https://huntervalleyweddingplanner.com.au/" target="_blank" rel="noopener" sx={{ color: '#c6b47a', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Hunter Valley Wedding Planner</Box>
+                        </Typography>
+                      </TestimonialCard>
+                    </Box>
+                    
+                    {/* Second Slide - CWCI Australia */}
+                    <Box 
+                      sx={{ 
+                        display: 'flex',
+                        width: '100%',
+                        flexShrink: 0,
+                        justifyContent: 'center',
+                        p: { xs: 2 }
+                      }}
+                    >
+                      <TestimonialCard sx={{ width: '100%' }}>
+                        <Box
+                          component="img"
+                          src="/motex-transport-cwci-logo.png"
+                          alt="CWCI Australia"
+                          sx={{
+                            height: { xs: '40px', sm: '60px' },
+                            mb: { xs: 2 },
+                            display: 'block',
+                            filter: 'brightness(1.2)',
+                          }}
+                        />
+                        
+                        <Typography variant="body1" sx={{ 
+                          mb: 2, 
+                          lineHeight: 1.6,
+                        fontFamily: BODY_FONT,
+                          fontStyle: 'italic',
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                          maxHeight: '180px',
+                          overflow: 'auto'
+                        }}>
+                          "Our premises are a challenge for deliveries with stairs and uneven surfaces, however Roy (Motex) has for many years delivered boxes to us with efficiency, care and cheerfulness. This makes a huge difference as we are a small staff yet often have deliveries varying from 5 - 30 boxes at different times of the year. This enables us to function well and always be on top of stock and supply. I would highly recommend Motex Transport to any size or type of business - you won't be disappointed!"
+                        </Typography>
+                        
+                        <Typography variant="subtitle1" sx={{ 
+                        fontFamily: BODY_FONT,
+                          fontWeight: 600,
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          fontSize: { xs: '0.75rem', sm: '0.85rem' }
+                        }}>
+                          - Christine, <Box component="a" href="https://cwciaus.org.au/" target="_blank" rel="noopener" sx={{ color: '#9b3dba', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>CWCI Australia</Box>
+                        </Typography>
+                      </TestimonialCard>
+                    </Box>
+                    
+                    {/* Third Slide - Sydney Visitor Centre */}
+                    <Box 
+                      sx={{ 
+                        display: 'flex',
+                        width: '100%',
+                        flexShrink: 0,
+                        justifyContent: 'center',
+                        p: { xs: 2 }
+                      }}
+                    >
+                      <TestimonialCard sx={{ width: '100%', textAlign: 'center' }}>
+                        <Box
+                          component="img"
+                          src="/Sydney+Visitor+Centre_Small.png"
+                          alt="Sydney Visitor Centre"
+                          sx={{
+                            height: { xs: '40px', sm: '50px' },
+                            mb: { xs: 2 },
+                            display: 'block',
+                            mx: 'auto',
+                            filter: 'brightness(1.2)',
+                          }}
+                        />
+                        
+                        <Typography variant="body1" sx={{ 
+                          mb: 2, 
+                          lineHeight: 1.6,
+                        fontFamily: BODY_FONT,
+                          fontStyle: 'italic',
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                          maxHeight: '180px',
+                          overflow: 'auto'
+                        }}>
+                          "The Motex Team consistently go that extra mile for the customer. In order to free up the time of our staff on the ground, the Motex team go above and beyond the typical expectations to ensure we as the customer are always put first whilst carrying out the job to an exemplary level. I would highly recommend and endorse Motex as being an excellent company, and we will most certainly continue to use their services."
+                        </Typography>
+                        
+                        <Typography variant="subtitle1" sx={{ 
+                        fontFamily: BODY_FONT,
+                          fontWeight: 600,
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          fontSize: { xs: '0.75rem', sm: '0.85rem' }
+                        }}>
+                          - Adam, <Box component="a" href="https://visitorcentre.com.au/" target="_blank" rel="noopener" sx={{ color: '#0066b3', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Sydney Visitor Centre</Box>
+                        </Typography>
+                      </TestimonialCard>
+                    </Box>
+                  </CarouselTrack>
+                </CarouselContainer>
+                
+                {/* Dots indicator for testimonial slides - mobile only */}
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
+                  {[
+                    { id: 'testimonial-dot-1', value: 0 }, 
+                    { id: 'testimonial-dot-2', value: 1 },
+                    { id: 'testimonial-dot-3', value: 2 }
+                  ].map((dot) => (
+                    <Box
+                      key={dot.id}
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: '50%',
+                        mx: 0.5,
+                        cursor: 'pointer',
+                        backgroundColor: dot.value === activeTestimonialSlide ? RED_COLOR : 'rgba(255,255,255,0.3)',
+                        transition: 'background-color 0.3s',
+                      }}
+                      onClick={() => setActiveTestimonialSlide(dot.value)}
+                    />
+                  ))}
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <PhoneIcon sx={{ color: 'white', mr: 1.5 }} />
-                  <Typography variant="body2" sx={{ color: 'white', opacity: 0.9, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    +61 423 440 056
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <EmailIcon sx={{ color: 'white', mr: 1.5 }} />
-                  <Typography variant="body2" sx={{ color: 'white', opacity: 0.8, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    motextransportau@gmail.com
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
-            
-            <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.3)', my: 4 }} />
-            
-            <Typography variant="body2" align="center" sx={{ color: 'white', opacity: 0.9, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-              © {new Date().getFullYear()} MOTEX Transport. All rights reserved.
-            </Typography>
-          </Container>
-        </Box>
-      </Box>
-      
-      {/* Mobile Menu */}
-      <Drawer
-        anchor="right"
-        open={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-        PaperProps={{
-          sx: {
-            width: { xs: '100%', sm: 300 },
-            backgroundColor: '#050505',
-            padding: { xs: 2, sm: 3 }
-          }
-        }}
-      >
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <IconButton 
-            onClick={() => setIsMobileMenuOpen(false)}
-            sx={{ color: 'white' }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
-        
-        <Box component="img" src="/MOTEX+Logo.png" alt="MOTEX Logo" sx={{ width: 120, my: 2 }} />
-        
-        <List>
-          <ListItem disablePadding>
-            <ListItemButton 
-              onClick={() => {
-                handleNavigation('/');
-                setIsMobileMenuOpen(false);
-              }}
-              sx={{ 
-                py: 1.5,
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.15)' }
-              }}
-            >
-              <ListItemText 
-                primary="Home" 
-                primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
-                  fontWeight: 600, 
-                  color: 'white',
-                  fontSize: { xs: '0.95rem', sm: '1rem' }
-                }} 
-              />
-            </ListItemButton>
-          </ListItem>
-          
-          <ListItem disablePadding>
-            <ListItemButton 
-              onClick={() => {
-                handleNavigation('/services');
-                setIsMobileMenuOpen(false);
-              }}
-              sx={{ 
-                py: 1.5,
-                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.05)' }
-              }}
-            >
-              <ListItemText 
-                primary="Services" 
-                primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
-                  fontWeight: 400, 
-                  color: 'white',
-                  fontSize: { xs: '0.95rem', sm: '1rem' }
-                }} 
-              />
-            </ListItemButton>
-          </ListItem>
-          
-          <ListItem disablePadding>
-            <ListItemButton 
-              onClick={() => {
-                handleNavigation('/about-us');
-                setIsMobileMenuOpen(false);
-              }}
-              sx={{ 
-                py: 1.5,
-                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.05)' }
-              }}
-            >
-              <ListItemText 
-                primary="About Us" 
-                primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
-                  fontWeight: 400, 
-                  color: 'white',
-                  fontSize: { xs: '0.95rem', sm: '1rem' }
-                }} 
-              />
-            </ListItemButton>
-          </ListItem>
-          
-          <ListItem disablePadding>
-            <ListItemButton 
-              onClick={() => {
-                handleNavigation('/instant-quote');
-                setIsMobileMenuOpen(false);
-              }}
-              sx={{ 
-                py: 1.5,
-                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.05)' }
-              }}
-            >
-              <ListItemText 
-                primary="Instant Quote" 
-                primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
-                  fontWeight: 400, 
-                  color: 'white',
-                  fontSize: { xs: '0.95rem', sm: '1rem' }
-                }} 
-              />
-            </ListItemButton>
-          </ListItem>
-          
-          <ListItem disablePadding>
-            <ListItemButton 
-              onClick={() => {
-                handleNavigation('/gallery');
-                setIsMobileMenuOpen(false);
-              }}
-              sx={{ 
-                py: 1.5,
-                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.05)' }
-              }}
-            >
-              <ListItemText 
-                primary="Gallery" 
-                primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
-                  fontWeight: 400, 
-                  color: 'white',
-                  fontSize: { xs: '0.95rem', sm: '1rem' }
-                }} 
-              />
-            </ListItemButton>
-          </ListItem>
-          
-          <ListItem disablePadding>
-            <ListItemButton 
-              onClick={() => {
-                handleNavigation('/contact-us');
-                setIsMobileMenuOpen(false);
-              }}
-              sx={{ 
-                py: 1.5,
-                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.05)' }
-              }}
-            >
-              <ListItemText 
-                primary="Contact Us" 
-                primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
-                  fontWeight: 400, 
-                  color: 'white',
-                  fontSize: { xs: '0.95rem', sm: '1rem' }
-                }} 
-              />
-            </ListItemButton>
-          </ListItem>
-        </List>
-        
-        <Box sx={{ p: 2, mt: 2 }}>
-          <Button 
-            onClick={() => {
-              handleNavigation('/instant-quote');
-              setIsMobileMenuOpen(false);
-            }}
-            variant="contained" 
-            fullWidth
-            sx={{
-              backgroundColor: RED_COLOR,
-              color: 'white',
-              fontFamily: '"Oswald", sans-serif',
-              fontWeight: 500,
-              py: 1,
-              borderRadius: 1,
-              transition: '0.3s',
-              fontSize: { xs: '0.9rem', sm: '1rem' },
-              '&:hover': {
-                backgroundColor: '#c50000',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)'
-              }
-            }}
-          >
-            Get a Quote
-          </Button>
-        </Box>
-      </Drawer>
-    </GradientBackground>
+              </Box>
+            </Container>
+          </TestimonialSection>
+      </GradientBackground>
     </>
   );
 };

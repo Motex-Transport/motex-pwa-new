@@ -48,11 +48,9 @@ const WHITE_TEXT = '#FFFFFF';
 const RED_COLOR = '#DE1F27';
 const PINK_RED = '#FF2992';
 
-// Define the font-family for Special Gothic with fallbacks
-// const SPECIAL_GOTHIC_FONT = '"Special Gothic Expanded One", "Anton", "Impact", sans-serif !important';
-// Replace with Oswald font
+// Define fonts
 const HEADING_FONT = '"Oswald", sans-serif';
-// const TAGLINE_FONT = '"Bebas Neue", sans-serif';
+const BODY_FONT = '"Mulish", sans-serif';
 
 // Styled components
 const GradientBackground = styled(Box)(({ theme }) => ({
@@ -328,7 +326,13 @@ const AboutUsPage = () => {
       />
       
       {/* Header - Matching landing page */}
-      <AppBar position="fixed" color="transparent" elevation={0} sx={{ py: 1, backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', zIndex: 1100 }}>
+      <AppBar position="fixed" color="transparent" elevation={0} sx={{ 
+        py: 1, 
+        backgroundColor: 'rgba(0, 0, 0, 0.85)', 
+        backdropFilter: 'blur(8px)', 
+        zIndex: 1100,
+        display: isMobile ? 'none' : 'flex' // Hide AppBar on mobile
+      }}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
           {/* Logo on the left */}
           <Box sx={{ display: 'flex', alignItems: 'center', width: '20%' }}>
@@ -362,7 +366,7 @@ const AboutUsPage = () => {
                 spacing={3} 
                 sx={{ 
                   color: 'white', 
-                  fontFamily: '"Poppins", sans-serif', 
+                  fontFamily: BODY_FONT, 
                   fontWeight: 400,
                   justifyContent: 'center',
                   fontSize: '16px',
@@ -376,7 +380,7 @@ const AboutUsPage = () => {
                   underline="none" 
                   sx={{ 
                     '&:hover': { color: RED_COLOR },
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: BODY_FONT,
                     fontSize: '16px',
                     lineHeight: '29px',
                     fontWeight: 400
@@ -391,7 +395,7 @@ const AboutUsPage = () => {
                   underline="none" 
                   sx={{ 
                     '&:hover': { color: RED_COLOR },
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: BODY_FONT,
                     fontSize: '16px',
                     lineHeight: '29px',
                     fontWeight: 400
@@ -407,7 +411,7 @@ const AboutUsPage = () => {
                   sx={{ 
                     color: RED_COLOR,
                     '&:hover': { color: RED_COLOR },
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: BODY_FONT,
                     fontSize: '16px',
                     lineHeight: '29px',
                     fontWeight: 400
@@ -422,7 +426,7 @@ const AboutUsPage = () => {
                   underline="none" 
                   sx={{ 
                     '&:hover': { color: RED_COLOR },
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: BODY_FONT,
                     fontSize: '16px',
                     lineHeight: '29px',
                     fontWeight: 400
@@ -437,7 +441,7 @@ const AboutUsPage = () => {
                   underline="none" 
                   sx={{ 
                     '&:hover': { color: RED_COLOR },
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: BODY_FONT,
                     fontSize: '16px',
                     lineHeight: '29px',
                     fontWeight: 400
@@ -452,7 +456,7 @@ const AboutUsPage = () => {
                   underline="none" 
                   sx={{ 
                     '&:hover': { color: RED_COLOR },
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: BODY_FONT,
                     fontSize: '16px',
                     lineHeight: '29px',
                     fontWeight: 400
@@ -474,7 +478,7 @@ const AboutUsPage = () => {
                   bgcolor: RED_COLOR, 
                   color: 'white',
                   textTransform: 'none',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: BODY_FONT,
                   fontWeight: 400,
                   fontSize: '15px',
                   borderRadius: '50px',
@@ -510,8 +514,8 @@ const AboutUsPage = () => {
         </Toolbar>
       </AppBar>
       
-      {/* Add toolbar spacer to prevent content from being hidden under the AppBar */}
-      <Box sx={{ height: '64px' }} />
+      {/* Add toolbar spacer to prevent content from being hidden under the AppBar - only for desktop */}
+      {!isMobile && <Box sx={{ height: '64px' }} />}
       
       {/* Hero Section with new tagline and Special Gothic font */}
       <HeroSection>
@@ -701,7 +705,7 @@ const AboutUsPage = () => {
                           fontStyle: 'italic',
                           fontSize: { xs: '0.8rem', sm: '1rem', md: '1.2rem' },
                           lineHeight: { xs: 1.4, md: 1.8 },
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: BODY_FONT,
                           mb: { xs: 1, md: 3 },
                           color: 'white',
                           position: 'relative'
@@ -752,7 +756,7 @@ const AboutUsPage = () => {
                           lineHeight: { xs: 1.6, md: 1.8 },
                           fontSize: { xs: '0.9rem', sm: '0.95rem', md: '1.05rem' },
                           opacity: 0.9,
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: BODY_FONT,
                           color: 'white'
                         }}
                       >
@@ -809,7 +813,7 @@ const AboutUsPage = () => {
                   fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
                   lineHeight: { xs: 1.6, md: 1.8 },
                   opacity: 0.9,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: BODY_FONT,
                   color: 'white',
                   px: { xs: 2, md: 0 }
                 }}
@@ -891,7 +895,7 @@ const AboutUsPage = () => {
                             gutterBottom 
                             className="value-title"
                             sx={{ 
-                              fontFamily: '"Poppins", sans-serif',
+                              fontFamily: BODY_FONT,
                               fontWeight: 700,
                               color: WHITE_TEXT,
                               transition: 'color 0.3s ease',
@@ -952,7 +956,7 @@ const AboutUsPage = () => {
                             gutterBottom 
                             className="value-title"
                             sx={{ 
-                              fontFamily: '"Poppins", sans-serif',
+                              fontFamily: BODY_FONT,
                               fontWeight: 700,
                               color: WHITE_TEXT,
                               transition: 'color 0.3s ease',
@@ -1016,7 +1020,7 @@ const AboutUsPage = () => {
                             gutterBottom 
                             className="value-title"
                             sx={{ 
-                              fontFamily: '"Poppins", sans-serif',
+                              fontFamily: BODY_FONT,
                               fontWeight: 700,
                               color: WHITE_TEXT,
                               transition: 'color 0.3s ease',
@@ -1084,7 +1088,7 @@ const AboutUsPage = () => {
                               gutterBottom 
                               className="value-title"
                               sx={{ 
-                                fontFamily: '"Poppins", sans-serif',
+                                fontFamily: BODY_FONT,
                                 fontWeight: 700,
                                 color: WHITE_TEXT,
                                 transition: 'color 0.3s ease',
@@ -1100,7 +1104,7 @@ const AboutUsPage = () => {
                               variant="body2" 
                               sx={{ 
                                 color: WHITE_TEXT,
-                                fontFamily: '"Poppins", sans-serif',
+                                fontFamily: BODY_FONT,
                                 fontSize: { sm: '0.85rem', md: '0.95rem' },
                                 lineHeight: { sm: 1.5, md: 1.6 }
                               }}
@@ -1120,101 +1124,10 @@ const AboutUsPage = () => {
         
         {/* Decorative Line */}
         <DecorativeLine />
-        
-        {/* Footer - Matching landing page */}
-        <Box sx={{ bgcolor: '#000000', py: 6, width: '100%' }}>
-          <Container maxWidth="lg">
-            <Grid container spacing={4}>
-              <Grid item xs={12} md={5}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <Box 
-                    component="img" 
-                    src="/MOTEX+Logo.png" 
-                    alt="MOTEX Logo" 
-                    sx={{ 
-                      height: 40, 
-                    }} 
-                  />
-                </Box>
-                <Typography variant="body2" sx={{ color: 'white', opacity: 0.8, mb: 3, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                  MOTEX Transport is a leading provider of logistics and transportation services across Australia, offering reliable and efficient solutions for businesses of all sizes.
-                </Typography>
-                
-                {/* Social Media Icons */}
-                <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                  <IconButton 
-                    sx={{ 
-                      color: 'white', 
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      '&:hover': { backgroundColor: RED_COLOR }
-                    }}
-                    component="a"
-                    href="https://www.instagram.com/motextransport/"
-                  >
-                    <InstagramIcon />
-                  </IconButton>
-                </Stack>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={3}>
-                <Typography variant="h6" sx={{ color: 'white', mb: 2, fontFamily: '"Poppins", sans-serif', fontWeight: 'bold', fontSize: '20px' }}>
-                  Quick Links
-                </Typography>
-                <Stack spacing={1}>
-                  <Link href="/" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Home
-                  </Link>
-                  <Link href="/about-us" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    About Us
-                  </Link>
-                  <Link href="#" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Services
-                  </Link>
-                  <Link href="/instant-quote" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Instant Quote
-                  </Link>
-                  <Link href="/gallery" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Gallery
-                  </Link>
-                  <Link href="#" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Contact
-                  </Link>
-                </Stack>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4}>
-                <Typography variant="h6" sx={{ color: 'white', mb: 2, fontFamily: '"Poppins", sans-serif', fontWeight: 'bold', fontSize: '20px' }}>
-                  Contact Information
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <LocationIcon sx={{ color: RED_COLOR, mr: 1.5 }} />
-                  <Typography variant="body2" sx={{ color: 'white', opacity: 0.8, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Rozelle NSW 2039, Australia
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <PhoneIcon sx={{ color: RED_COLOR, mr: 1.5 }} />
-                  <Typography variant="body2" sx={{ color: 'white', opacity: 0.8, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    +61 423 440 056
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <EmailIcon sx={{ color: RED_COLOR, mr: 1.5 }} />
-                  <Typography variant="body2" sx={{ color: 'white', opacity: 0.8, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    motextransportau@gmail.com
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
-            
-            <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', my: 4 }} />
-            
-            <Typography variant="body2" align="center" sx={{ color: 'white', opacity: 0.7, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-              © {new Date().getFullYear()} MOTEX Transport. All rights reserved.
-            </Typography>
-          </Container>
-        </Box>
       </ContentSection>
+      
+      {/* Add padding at the bottom for mobile to prevent content from being hidden under bottom navigation */}
+      {isMobile && <Box sx={{ height: '70px' }} />}
       
       {/* Mobile Menu */}
       <Drawer
@@ -1255,7 +1168,7 @@ const AboutUsPage = () => {
               <ListItemText 
                 primary="Home" 
                 primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
+                  fontFamily: BODY_FONT, 
                   fontWeight: 400, 
                   color: 'white',
                   fontSize: { xs: '0.95rem', sm: '1rem' }
@@ -1278,7 +1191,7 @@ const AboutUsPage = () => {
               <ListItemText 
                 primary="Services" 
                 primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
+                  fontFamily: BODY_FONT, 
                   fontWeight: 400, 
                   color: 'white',
                   fontSize: { xs: '0.95rem', sm: '1rem' }
@@ -1302,7 +1215,7 @@ const AboutUsPage = () => {
               <ListItemText 
                 primary="About Us" 
                 primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
+                  fontFamily: BODY_FONT, 
                   fontWeight: 600, 
                   color: 'white',
                   fontSize: { xs: '0.95rem', sm: '1rem' }
@@ -1325,7 +1238,7 @@ const AboutUsPage = () => {
               <ListItemText 
                 primary="Instant Quote" 
                 primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
+                  fontFamily: BODY_FONT, 
                   fontWeight: 400, 
                   color: 'white',
                   fontSize: { xs: '0.95rem', sm: '1rem' }
@@ -1348,7 +1261,7 @@ const AboutUsPage = () => {
               <ListItemText 
                 primary="Gallery" 
                 primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
+                  fontFamily: BODY_FONT, 
                   fontWeight: 400, 
                   color: 'white',
                   fontSize: { xs: '0.95rem', sm: '1rem' }
@@ -1371,7 +1284,7 @@ const AboutUsPage = () => {
               <ListItemText 
                 primary="Contact Us" 
                 primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
+                  fontFamily: BODY_FONT, 
                   fontWeight: 400, 
                   color: 'white',
                   fontSize: { xs: '0.95rem', sm: '1rem' }
@@ -1392,7 +1305,7 @@ const AboutUsPage = () => {
             sx={{
               backgroundColor: RED_COLOR,
               color: 'white',
-              fontFamily: '"Oswald", sans-serif',
+              fontFamily: HEADING_FONT,
               fontWeight: 500,
               py: 1,
               borderRadius: 1,

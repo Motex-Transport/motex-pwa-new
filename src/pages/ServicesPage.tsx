@@ -487,7 +487,13 @@ const ServicesPage = () => {
     <PageTransition>
       <PageWrapper>
       {/* Header - Updated to match landing page */}
-      <AppBar position="fixed" color="transparent" elevation={0} sx={{ py: 1, backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', zIndex: 1100 }}>
+      <AppBar position="fixed" color="transparent" elevation={0} sx={{ 
+        py: 1, 
+        backgroundColor: 'rgba(0, 0, 0, 0.85)', 
+        backdropFilter: 'blur(8px)', 
+        zIndex: 1100,
+        display: isMobile ? 'none' : 'flex' // Hide AppBar on mobile
+      }}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
           {/* Logo on the left */}
           <Box sx={{ display: 'flex', alignItems: 'center', width: '20%' }}>
@@ -524,7 +530,7 @@ const ServicesPage = () => {
                 spacing={3} 
                 sx={{ 
                   color: 'white', 
-                  fontFamily: '"Poppins", sans-serif', 
+                  fontFamily: '"Mulish", sans-serif', 
                   fontWeight: 400,
                   justifyContent: 'center',
                   fontSize: '16px',
@@ -538,7 +544,7 @@ const ServicesPage = () => {
                   underline="none" 
                   sx={{ 
                     '&:hover': { color: RED_COLOR },
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"Mulish", sans-serif',
                     fontSize: '16px',
                     lineHeight: '29px',
                     fontWeight: 400
@@ -552,7 +558,7 @@ const ServicesPage = () => {
                   sx={{ 
                     color: RED_COLOR,
                     textDecoration: 'none',
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"Mulish", sans-serif',
                     fontSize: '16px',
                     lineHeight: '29px',
                     fontWeight: 600,
@@ -612,7 +618,7 @@ const ServicesPage = () => {
                   bgcolor: RED_COLOR, 
                   color: 'white',
                   textTransform: 'none',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"Mulish", sans-serif',
                   fontWeight: 400,
                   fontSize: '15px',
                   borderRadius: '50px',
@@ -648,8 +654,8 @@ const ServicesPage = () => {
         </Toolbar>
       </AppBar>
       
-      {/* Toolbar spacer to prevent content from being hidden under fixed AppBar */}
-      <Box sx={{ height: '64px' }} />
+      {/* Toolbar spacer to prevent content from being hidden under fixed AppBar - only for desktop */}
+      {!isMobile && <Box sx={{ height: '64px' }} />}
       
       <ContentSection ref={contentSectionRef}>
         {/* Mouse follower gradient light - positioned relative to viewport */}
@@ -676,19 +682,19 @@ const ServicesPage = () => {
               style={{ 
                 display: 'flex', 
                 flexDirection: 'column',
-                justifyContent: 'center', 
-                alignItems: 'center' 
+                justifyContent: 'flex-start', 
+                alignItems: 'flex-start' 
               }}
             >
               <Typography 
                 variant="h2" 
-                align="center" 
+                align="left" 
                 sx={{ 
                   mb: 1,
                   fontWeight: 800,
                   color: RED_COLOR,
                   fontFamily: '"Oswald", sans-serif',
-                  fontSize: { xs: '2.5rem', sm: '3.5rem', md: '5rem', lg: '6rem' },
+                  fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
                   letterSpacing: { xs: '1px', sm: '2px', md: '3px' }
                 }}
               >
@@ -706,7 +712,7 @@ const ServicesPage = () => {
         <Box sx={{ position: 'relative' }}>
           {/* Services Section */}
           <Box 
-            sx={{ py: { xs: 5, md: 8 }, position: 'relative', overflow: 'hidden' }}
+            sx={{ py: { xs: 4, md: 6 }, position: 'relative', overflow: 'hidden' }}
           >
             <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
               <motion.div
@@ -714,39 +720,9 @@ const ServicesPage = () => {
                 initial="hidden"
                 animate={isLoaded ? "visible" : "hidden"}
               >
-                <Typography 
-                  variant="h2" 
-                  align="center" 
-                  sx={{ 
-                    mb: { xs: 1, md: 2 },
-                    fontWeight: 700,
-                    color: 'white',
-                    fontFamily: '"Oswald", sans-serif',
-                    fontSize: { xs: '1.75rem', sm: '2.25rem', md: '3rem' }
-                  }}
-                >
-                  WHAT WE OFFER
-                </Typography>
-                <Typography 
-                  variant="body1" 
-                  align="center" 
-                  sx={{ 
-                    mb: { xs: 4, md: 6 },
-                    color: 'rgba(255,255,255,0.7)',
-                    maxWidth: '700px',
-                    mx: 'auto',
-                    fontFamily: '"Poppins", sans-serif',
-                    fontSize: { xs: '0.875rem', sm: '1rem', md: '16px' },
-                    lineHeight: { xs: 1.5, md: '29px' },
-                    fontWeight: 400
-                  }}
-                >
-                  From local deliveries to interstate transport, our comprehensive range of services is designed to meet all your logistics needs with efficiency and reliability.
-                </Typography>
-
                 <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
                   {services.map((service) => (
-                    <Grid item xs={6} sm={6} md={4} key={service.id}>
+                    <Grid item xs={6} sm={4} md={4} key={service.id}>
                       <motion.div variants={itemVariants}>
                         <ServiceCard onClick={() => {
                           navigate('/instant-quote', { state: { selectedService: service.title } });
@@ -754,24 +730,24 @@ const ServicesPage = () => {
                         }}>
                           <CardMedia
                             component="img"
-                            height="200"
+                            height="150"
                             image={service.image}
                             alt={service.title}
                             sx={{ 
                               opacity: 0.8,
-                              height: { xs: 100, sm: 140, md: 200 }
+                              height: { xs: 100, sm: 120, md: 150 }
                             }}
                           />
-                          <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
+                          <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 2.5 } }}>
                             <Typography 
                               variant="h5" 
                               className="service-title"
                               sx={{ 
-                                mb: { xs: 0.75, sm: 1, md: 2 },
+                                mb: { xs: 0.75, sm: 1, md: 1.5 },
                                 fontWeight: 600,
                                 color: 'white',
-                                fontFamily: '"Poppins", sans-serif',
-                                fontSize: { xs: '0.85rem', sm: '1rem', md: '1.5rem' }
+                                fontFamily: '"Mulish", sans-serif',
+                                fontSize: { xs: '0.85rem', sm: '1rem', md: '1.25rem' }
                               }}
                             >
                               {service.title}
@@ -780,9 +756,9 @@ const ServicesPage = () => {
                               variant="body2" 
                               sx={{ 
                                 color: 'rgba(255,255,255,0.7)',
-                                fontFamily: '"Poppins", sans-serif',
-                                lineHeight: { xs: 1.4, sm: 1.6, md: '29px' },
-                                fontSize: { xs: '0.75rem', sm: '0.85rem', md: '16px' },
+                                fontFamily: '"Mulish", sans-serif',
+                                lineHeight: { xs: 1.4, sm: 1.6, md: '24px' },
+                                fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.9rem' },
                                 fontWeight: 400,
                                 display: { xs: 'none', sm: 'block' } // Hide description on extra small screens
                               }}
@@ -828,7 +804,7 @@ const ServicesPage = () => {
                     color: 'rgba(255,255,255,0.7)',
                     maxWidth: '700px',
                     mx: 'auto',
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"Mulish", sans-serif',
                     fontSize: { xs: '0.875rem', sm: '1rem', md: '16px' },
                     lineHeight: { xs: 1.5, md: '29px' },
                     fontWeight: 400
@@ -850,7 +826,7 @@ const ServicesPage = () => {
                                 mb: 3, 
                                 fontStyle: 'italic',
                                 color: 'white',
-                                fontFamily: '"Poppins", sans-serif',
+                                fontFamily: '"Mulish", sans-serif',
                                 lineHeight: '29px',
                                 fontSize: '16px',
                                 fontWeight: 400
@@ -865,7 +841,7 @@ const ServicesPage = () => {
                               sx={{ 
                                 fontWeight: 600,
                                 color: 'white',
-                                fontFamily: '"Poppins", sans-serif',
+                                fontFamily: '"Mulish", sans-serif',
                               }}
                             >
                               {testimonial.author}
@@ -874,7 +850,7 @@ const ServicesPage = () => {
                               variant="body2" 
                               sx={{ 
                                 color: 'rgba(255,255,255,0.7)',
-                                fontFamily: '"Poppins", sans-serif',
+                                fontFamily: '"Mulish", sans-serif',
                                 fontSize: '16px',
                                 lineHeight: '29px',
                                 fontWeight: 400
@@ -916,7 +892,7 @@ const ServicesPage = () => {
                                 sx={{ 
                                   mb: 2, 
                                   lineHeight: 1.5,
-                                  fontFamily: '"Poppins", sans-serif',
+                                  fontFamily: '"Mulish", sans-serif',
                                   fontStyle: 'italic',
                                   color: 'rgba(255, 255, 255, 0.9)',
                                   fontSize: '0.75rem',
@@ -933,7 +909,7 @@ const ServicesPage = () => {
                                 sx={{ 
                                   fontWeight: 600,
                                   color: 'white',
-                                  fontFamily: '"Poppins", sans-serif',
+                                  fontFamily: '"Mulish", sans-serif',
                                   fontSize: '0.8rem'
                                 }}
                               >
@@ -943,7 +919,7 @@ const ServicesPage = () => {
                                 variant="body2" 
                                 sx={{ 
                                   color: 'rgba(255,255,255,0.7)',
-                                  fontFamily: '"Poppins", sans-serif',
+                                  fontFamily: '"Mulish", sans-serif',
                                   fontSize: '0.75rem',
                                   fontWeight: 400
                                 }}
@@ -971,7 +947,7 @@ const ServicesPage = () => {
                                 sx={{ 
                                   mb: 2, 
                                   lineHeight: 1.5,
-                                  fontFamily: '"Poppins", sans-serif',
+                                  fontFamily: '"Mulish", sans-serif',
                                   fontStyle: 'italic',
                                   color: 'rgba(255, 255, 255, 0.9)',
                                   fontSize: '0.75rem',
@@ -988,7 +964,7 @@ const ServicesPage = () => {
                                 sx={{ 
                                   fontWeight: 600,
                                   color: 'white',
-                                  fontFamily: '"Poppins", sans-serif',
+                                  fontFamily: '"Mulish", sans-serif',
                                   fontSize: '0.8rem'
                                 }}
                               >
@@ -998,7 +974,7 @@ const ServicesPage = () => {
                                 variant="body2" 
                                 sx={{ 
                                   color: 'rgba(255,255,255,0.7)',
-                                  fontFamily: '"Poppins", sans-serif',
+                                  fontFamily: '"Mulish", sans-serif',
                                   fontSize: '0.75rem',
                                   fontWeight: 400
                                 }}
@@ -1026,7 +1002,7 @@ const ServicesPage = () => {
                                 sx={{ 
                                   mb: 2, 
                                   lineHeight: 1.5,
-                                  fontFamily: '"Poppins", sans-serif',
+                                  fontFamily: '"Mulish", sans-serif',
                                   fontStyle: 'italic',
                                   color: 'rgba(255, 255, 255, 0.9)',
                                   fontSize: '0.75rem',
@@ -1043,7 +1019,7 @@ const ServicesPage = () => {
                                 sx={{ 
                                   fontWeight: 600,
                                   color: 'white',
-                                  fontFamily: '"Poppins", sans-serif',
+                                  fontFamily: '"Mulish", sans-serif',
                                   fontSize: '0.8rem'
                                 }}
                               >
@@ -1053,7 +1029,7 @@ const ServicesPage = () => {
                                 variant="body2" 
                                 sx={{ 
                                   color: 'rgba(255,255,255,0.7)',
-                                  fontFamily: '"Poppins", sans-serif',
+                                  fontFamily: '"Mulish", sans-serif',
                                   fontSize: '0.75rem',
                                   fontWeight: 400
                                 }}
@@ -1129,7 +1105,7 @@ const ServicesPage = () => {
                     color: 'rgba(255,255,255,0.8)',
                     maxWidth: '700px',
                     mx: 'auto',
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"Mulish", sans-serif',
                     fontSize: { xs: '0.875rem', sm: '1rem', md: '16px' },
                     lineHeight: { xs: 1.5, md: '29px' },
                     fontWeight: 400
@@ -1145,7 +1121,7 @@ const ServicesPage = () => {
                     bgcolor: RED_COLOR, 
                     color: 'white',
                     textTransform: 'none',
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"Mulish", sans-serif',
                     fontWeight: 400,
                     fontSize: '15px',
                     borderRadius: '50px',
@@ -1169,99 +1145,8 @@ const ServicesPage = () => {
           </Container>
         </Box>
 
-        {/* Footer */}
-        <Box sx={{ bgcolor: DARKER_BG, py: 6 }}>
-          <Container maxWidth="lg">
-            <Grid container spacing={4}>
-              <Grid item xs={12} md={5}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <Box 
-                    component="img" 
-                    src="/MOTEX+Logo.png" 
-                    alt="MOTEX Logo" 
-                    sx={{ 
-                      height: 40, 
-                    }} 
-                  />
-                </Box>
-                <Typography variant="body2" sx={{ color: 'white', opacity: 0.8, mb: 3, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                  MOTEX Transport is a leading provider of logistics and transportation services across Australia, offering reliable and efficient solutions for businesses of all sizes.
-                </Typography>
-                
-                {/* Social Media Icons */}
-                <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                  <IconButton 
-                    sx={{ 
-                      color: 'white', 
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      '&:hover': { backgroundColor: '#DE1F27' }
-                    }}
-                    component="a"
-                    href="https://www.instagram.com/motextransport/"
-                  >
-                    <InstagramIcon />
-                  </IconButton>
-                </Stack>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={3}>
-                <Typography variant="h6" sx={{ color: 'white', mb: 2, fontFamily: '"Poppins", sans-serif', fontWeight: 'bold', fontSize: '20px' }}>
-                  Quick Links
-                </Typography>
-                <Stack spacing={1}>
-                  <Link href="/" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Home
-                  </Link>
-                  <Link href="/about-us" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    About Us
-                  </Link>
-                  <Link href="#" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Services
-                  </Link>
-                  <Link href="/instant-quote" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Instant Quote
-                  </Link>
-                  <Link href="/gallery" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Gallery
-                  </Link>
-                  <Link href="#" color="inherit" underline="hover" sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    Contact
-                  </Link>
-                </Stack>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4}>
-                <Typography variant="h6" sx={{ color: 'white', mb: 2, fontFamily: '"Poppins", sans-serif', fontWeight: 'bold', fontSize: '20px' }}>
-                  Contact Information
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <LocationIcon sx={{ color: '#DE1F27', mr: 1.5 }} />
-                  <Typography variant="body2" sx={{ color: 'white', opacity: 0.8, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                  Rozelle NSW 2039, Australia
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <PhoneIcon sx={{ color: '#DE1F27', mr: 1.5 }} />
-                  <Typography variant="body2" sx={{ color: 'white', opacity: 0.8, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    +61 423 440 056
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <EmailIcon sx={{ color: '#DE1F27', mr: 1.5 }} />
-                  <Typography variant="body2" sx={{ color: 'white', opacity: 0.8, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-                    motextransportau@gmail.com
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
-            
-            <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', my: 4 }} />
-            
-            <Typography variant="body2" align="center" sx={{ color: 'white', opacity: 0.7, fontFamily: '"Poppins", sans-serif', fontWeight: 300 }}>
-              © {new Date().getFullYear()} MOTEX Transport. All rights reserved.
-            </Typography>
-          </Container>
-        </Box>
+        {/* Add padding at the bottom for mobile to prevent content from being hidden under bottom navigation */}
+        {isMobile && <Box sx={{ height: '70px' }} />}
       </ContentSection>
 
       {/* Mobile Menu */}
@@ -1303,7 +1188,7 @@ const ServicesPage = () => {
               <ListItemText 
                 primary="Home" 
                 primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
+                  fontFamily: '"Mulish", sans-serif', 
                   fontWeight: 400, 
                   color: 'white',
                   fontSize: { xs: '0.95rem', sm: '1rem' }
@@ -1327,7 +1212,7 @@ const ServicesPage = () => {
               <ListItemText 
                 primary="Services" 
                 primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
+                  fontFamily: '"Mulish", sans-serif', 
                   fontWeight: 600, 
                   color: 'white',
                   fontSize: { xs: '0.95rem', sm: '1rem' }
@@ -1350,7 +1235,7 @@ const ServicesPage = () => {
               <ListItemText 
                 primary="About Us" 
                 primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
+                  fontFamily: '"Mulish", sans-serif', 
                   fontWeight: 400, 
                   color: 'white',
                   fontSize: { xs: '0.95rem', sm: '1rem' }
@@ -1373,7 +1258,7 @@ const ServicesPage = () => {
               <ListItemText 
                 primary="Instant Quote" 
                 primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
+                  fontFamily: '"Mulish", sans-serif', 
                   fontWeight: 400, 
                   color: 'white',
                   fontSize: { xs: '0.95rem', sm: '1rem' }
@@ -1396,7 +1281,7 @@ const ServicesPage = () => {
               <ListItemText 
                 primary="Gallery" 
                 primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
+                  fontFamily: '"Mulish", sans-serif', 
                   fontWeight: 400, 
                   color: 'white',
                   fontSize: { xs: '0.95rem', sm: '1rem' }
@@ -1419,7 +1304,7 @@ const ServicesPage = () => {
               <ListItemText 
                 primary="Contact Us" 
                 primaryTypographyProps={{ 
-                  fontFamily: '"Poppins", sans-serif', 
+                  fontFamily: '"Mulish", sans-serif', 
                   fontWeight: 400, 
                   color: 'white',
                   fontSize: { xs: '0.95rem', sm: '1rem' }
@@ -1440,7 +1325,7 @@ const ServicesPage = () => {
             sx={{
               backgroundColor: RED_COLOR,
               color: 'white',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"Mulish", sans-serif',
               fontWeight: 500,
               py: 1,
               borderRadius: 1,
